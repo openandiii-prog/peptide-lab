@@ -173,6 +173,8 @@ footer ul{padding-left:18px;margin:8px 0 0}
 .stage canvas:active{cursor:grabbing}
 .stage .ctrl{position:absolute;right:10px;top:58px;display:flex;flex-direction:column;gap:6px}
 @media (max-width:520px){.prof-row .prof{width:80px}.stage-title{display:none}}
+@media (max-width:860px){.stage .ctrl{flex-direction:row;top:8px;right:56px}.stage-title{display:none}}
+@media (max-width:860px) and (max-height:820px){.legend{display:none}}
 .ibtn{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.35);color:var(--chalk);border:1px solid var(--chalk-faint);font-family:var(--f-mono);font-size:1rem;cursor:pointer;display:grid;place-items:center}
 .ibtn:hover{border-color:var(--chalk)}
 .legend{position:absolute;left:10px;bottom:10px;right:10px;display:flex;flex-wrap:wrap;gap:4px 12px;font-family:var(--f-mono);font-size:.66rem;color:var(--chalk-dim);pointer-events:none}
