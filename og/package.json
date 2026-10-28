@@ -1,0 +1,7 @@
+{
+  "name": "peptide-lab-og",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build-og.mjs", "check": "vgpu check chalk.wgsl" },
+  "dependencies": { "vgpu": "0.6.0", "pngjs": "7.0.0" }
+}

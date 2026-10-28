@@ -2,6 +2,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Peptide Lab 101</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A chalkboard classroom for 49 peptides: which hormones each one raises or blocks, metabolic data, trial results, half-lives, and a 3D molecule built from the real sequence.">
+<meta property="og:title" content="Peptide Lab 101">
+<meta property="og:description" content="49 peptides, the hormones they switch on and off, and a 3D molecule for every one. Taught by Prof. Helix.">
+<meta property="og:image" content="https://peptide-lab-sand.vercel.app/og-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://peptide-lab-sand.vercel.app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://peptide-lab-sand.vercel.app/og-hero.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&family=Kalam:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -209,6 +218,35 @@ footer ul{padding-left:18px;margin:8px 0 0}
 .fx .v{font-family:var(--f-mono);font-size:.75rem;color:var(--chalk-dim);text-align:right}
 .navrow{display:flex;justify-content:space-between;gap:10px}
 .reveal{will-change:transform}
+.grid{transform:skewY(calc(var(--v,0) * 1.6deg));transform-origin:50% 0}
+
+/* soup: particle field */
+.soup{position:relative;height:clamp(300px,46vw,440px);border:1.5px solid var(--chalk-faint);border-radius:12px;overflow:hidden;background:rgba(0,0,0,.12)}
+.soup canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+.soup .word{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-size:clamp(2.4rem,9vw,6rem);color:transparent;pointer-events:none;margin:0}
+.soup-cap{position:absolute;left:12px;bottom:10px;right:12px;font-family:var(--f-hand);color:var(--chalk-dim);font-size:.95rem;pointer-events:none;display:flex;justify-content:space-between;gap:10px}
+
+/* toy box: matter-js */
+.box{position:relative;height:clamp(320px,40vw,420px);border:1.5px solid var(--chalk-faint);border-bottom:6px solid var(--wood);border-radius:12px 12px 6px 6px;overflow:hidden;background:rgba(0,0,0,.12);touch-action:pan-y}
+.res{position:absolute;left:0;top:0;height:40px;display:grid;place-items:center;border-radius:999px;font-family:var(--f-mono);font-weight:600;font-size:.86rem;color:#17251f;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),2px 3px 0 rgba(0,0,0,.25);cursor:grab;touch-action:none;user-select:none;will-change:transform}
+.res:active{cursor:grabbing}
+.box .hint{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-hand);color:var(--chalk-dim);font-size:1.15rem;pointer-events:none;text-align:center;padding:20px}
+
+/* drag-to-confirm capsule */
+.capsule{position:relative;isolation:isolate;--p:0;height:60px;border-radius:999px;border:1.5px solid var(--chalk-faint);background:rgba(0,0,0,.18);overflow:hidden;max-width:440px;margin-top:6px}
+.capsule::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(243,211,107,.15),rgba(243,211,107,.55));transform-origin:left;transform:scaleX(var(--p))}
+.capsule__label{position:absolute;inset:0;display:grid;place-items:center;padding-left:80px;font-family:var(--f-hand);font-size:1.1rem;color:var(--chalk-dim);pointer-events:none;transition:opacity .2s}
+.capsule__knob{position:absolute;left:4px;top:4px;height:50px;min-width:116px;border-radius:999px;border:0;background:var(--yellow);color:#1b2a24;font-family:var(--f-hand);font-weight:700;font-size:1.05rem;cursor:grab;box-shadow:2px 2px 0 rgba(0,0,0,.25);transform:translate3d(calc(var(--p) * var(--travel,0px)),0,0)}
+.capsule[data-state="done"] .capsule__label{opacity:0}
+
+/* bench gestures */
+.grab{display:none}
+@media (max-width:860px){
+  .grab{display:block;position:sticky;top:-18px;z-index:3;margin:-18px -20px 0;padding:10px 0 8px;background:var(--board-3);touch-action:none;cursor:grab;text-align:center;font-family:var(--f-mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--chalk-dim)}
+  .grab::before{content:"";display:block;width:44px;height:5px;border-radius:3px;background:var(--chalk-faint);margin:0 auto 6px}
+}
+.data{touch-action:pan-y}
+.swipe-hint{font-family:var(--f-hand);font-size:.95rem;color:var(--yellow);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -219,6 +257,7 @@ footer ul{padding-left:18px;margin:8px 0 0}
       <a href="#lecture">Lecture</a>
       <a href="#table">Periodic table</a>
       <a href="#switchboard">Hormone switchboard</a>
+      <a href="#toybox">Toy box</a>
       <a href="#scoreboard">Weight-loss scoreboard</a>
       <a href="#halflife">Half-lives</a>
       <a href="#quiz">Pop quiz</a>
@@ -243,6 +282,25 @@ footer ul{padding-left:18px;margin:8px 0 0}
     <div class="hero-stage reveal" id="heroStage">
       <canvas id="heroCanvas" aria-label="Rotating 3D model of semaglutide"></canvas>
       <div class="stage-cap"><span>On the board: semaglutide, 31 residues</span><span>drag to spin</span></div>
+    </div>
+  </section>
+
+  <section id="soup" style="padding-top:24px">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Warm-up · the primordial soup</div>
+      <h2 class="chalk">From loose amino acids to a peptide</h2>
+      <p>Thousands of free amino acids, colored by chemistry. Scroll and they bond into a word. Move through them to stir the soup, tap to boil it, and watch them find their place again.</p>
+    </div>
+    <div class="tools reveal" id="soupWords" role="group" aria-label="What the soup spells">
+      <button class="chip" data-w="PEPTIDE" aria-pressed="true">Peptide</button>
+      <button class="chip" data-w="INSULIN" aria-pressed="false">Insulin</button>
+      <button class="chip" data-w="GLP-1" aria-pressed="false">GLP-1</button>
+      <button class="chip" data-w="OXYTOCIN" aria-pressed="false">Oxytocin</button>
+    </div>
+    <div class="soup reveal" id="soupBox">
+      <p class="word" id="soupWord">PEPTIDE</p>
+      <canvas id="soupCanvas" aria-hidden="true"></canvas>
+      <div class="soup-cap"><span>stir: move · boil: tap</span><span id="soupCount"></span></div>
     </div>
   </section>
 
@@ -283,6 +341,24 @@ footer ul{padding-left:18px;margin:8px 0 0}
           <div class="col down"><h3>▼ Blocks or suppresses</h3><div class="pchips" id="hdown"></div></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section id="toybox">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Lab practical</div>
+      <h2 class="chalk">Pour a peptide into the toy box</h2>
+      <p>Each chip is one amino acid with real weight. Pour a peptide's sequence in, then grab the residues and throw them around. Bigger residues like Trp and Arg are heavier, glycine is the lightest.</p>
+    </div>
+    <div class="tools reveal" id="pour" role="group" aria-label="Pour a peptide">
+      <button class="chip" data-p="sema">Pour semaglutide</button>
+      <button class="chip" data-p="oxt">Pour oxytocin</button>
+      <button class="chip" data-p="bpc">Pour BPC-157</button>
+      <button class="chip" data-p="tesa">Pour tesamorelin</button>
+      <button class="chip" data-p="empty">Empty the box</button>
+    </div>
+    <div class="box reveal" id="box" aria-label="Physics box of amino acid chips">
+      <div class="hint" id="boxHint">Pick a peptide above to pour its amino acids in.</div>
     </div>
   </section>
 
@@ -351,7 +427,8 @@ footer ul{padding-left:18px;margin:8px 0 0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/lenis@1.3.11/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 <script>
 /* ---------- data ---------- */
 const FAM={
@@ -553,8 +630,9 @@ function makeViewer(canvas,opts={}){
   function size(){const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
   new ResizeObserver(size).observe(canvas);
   function eob(x){const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
-  function frame(now){
+  function frame(){
     if(!running)return;
+    const now=performance.now();
     const per=motion?Math.min(60,1600/n):0, k=motion?(now-t0)/per:1e9;
     parts.forEach(m=>{
       const s=Math.max(0,Math.min(1,(k-m.userData.order)/6)); const e=s<1?eob(s):1;
@@ -562,14 +640,15 @@ function makeViewer(canvas,opts={}){
       else m.scale.setScalar(m.userData.r*e*(m.userData.res===hover?1.25:1));
     });
     if(!drag&&motion)ry+=.0045;
-    pivot.rotation.set(rx,ry,0);
+    const s=opts.scrub?opts.scrub():0;   // scroll progress object, written only by a ScrollTrigger
+    pivot.rotation.set(rx+s*.5,ry+s*Math.PI*1.4,0);
     const half=Math.min(19*Math.PI/180,Math.atan(Math.tan(19*Math.PI/180)*cam.aspect));
-    cam.position.set(0,0,rad/Math.tan(half)*.92*zf);cam.lookAt(0,0,0);
+    cam.position.set(0,0,rad/Math.tan(half)*.92*zf*(1-s*.35));cam.lookAt(0,0,0);
     renderer.render(scene,cam);
-    requestAnimationFrame(frame);
   }
-  function start(){if(running||!visible)return;running=true;size();requestAnimationFrame(frame);}
-  function stop(){running=false;}
+  // one loop per page: every renderer rides gsap.ticker
+  function start(){if(running||!visible)return;running=true;size();gsap.ticker.add(frame);}
+  function stop(){running=false;gsap.ticker.remove(frame);}
   canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
   canvas.addEventListener("pointerup",()=>drag=null);
   canvas.addEventListener("pointercancel",()=>drag=null);
@@ -590,7 +669,8 @@ function makeViewer(canvas,opts={}){
 
 /* ---------- hero ---------- */
 const byId=Object.fromEntries(P.map(p=>[p.id,p]));
-const hero=makeViewer(document.getElementById("heroCanvas"));
+const heroProg={v:0};
+const hero=makeViewer(document.getElementById("heroCanvas"),{scrub:()=>heroProg.v});
 if(hero)hero.build(byId.sema); else document.getElementById("heroStage").innerHTML='<div class="nogl">No WebGL on this device, so the 3D models are off. Everything else works.</div>';
 const allH=[...new Set(P.flatMap(p=>[...p.up,...p.dn]))];
 document.getElementById("stats").innerHTML=[[P.length,"peptides on the board"],[allH.length,"hormones and signals mapped"],[P.filter(p=>p.st==="fda").length,"FDA approved"],[P.reduce((a,p)=>a+p.len,0),"amino acids drawn"]].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
@@ -692,6 +772,7 @@ function openPep(id){
   const hchips=(arr,cls)=>arr.length?arr.map(h=>`<span class="pill" style="color:var(--${cls})">${h}</span>`).join(" "):'<span class="muted">none on record</span>';
   document.getElementById("mStageTitle").textContent=`${p.n} · ${p.len} residues${p.cyc?" · cyclic":""}`;
   mData.innerHTML=`
+  <div class="grab" id="grab" aria-hidden="true">pull down to close · swipe for next</div>
   <div class="dhead"><div class="el" style="--c:${fc}"><small>${p.i}</small>${p.s}</div>
     <div style="min-width:0"><h2 id="mName" class="chalk">${p.n}</h2>
     <div class="pills"><span class="pill s-${p.st}">${STATUS[p.st]}</span><span class="pill" style="color:${fc}">${FAM[p.c].n}</span><span class="pill" style="color:var(--chalk-dim)">Evidence ${p.ev}</span></div></div></div>
@@ -713,9 +794,10 @@ function openPep(id){
   sr.addEventListener("pointerover",e=>{const a=e.target.closest(".aa");if(a&&mv)mv.setHover(+a.dataset.i);});
   sr.addEventListener("pointerout",()=>mv&&mv.setHover(-1));
   const v=ensureViewer();if(v)v.build(p);
+  bindGrab(document.getElementById("grab"));
   document.getElementById("mClose").focus({preventScroll:true});
 }
-function closePep(){if(modal.hidden)return;modal.hidden=true;tip.hidden=true;mv&&mv.stop();lenis&&lenis.start();document.body.style.overflow="";cur=null;lastFocus&&lastFocus.focus({preventScroll:true});}
+function closePep(){if(modal.hidden)return;modal.hidden=true;bench.style.transform="";tip.hidden=true;mv&&mv.stop();lenis&&lenis.start();document.body.style.overflow="";cur=null;lastFocus&&lastFocus.focus({preventScroll:true});}
 document.getElementById("mClose").onclick=closePep;
 modal.addEventListener("click",e=>{if(e.target===modal)closePep();});
 document.getElementById("zIn").onclick=()=>mv&&mv.zoom(.85);
@@ -749,29 +831,300 @@ function renderQ(){
   });
 }
 qcard.addEventListener("click",e=>{const a=e.target.closest("a[data-id]");if(a){e.preventDefault();openPep(a.dataset.id);}});
-newQuiz();
 
-/* ---------- scroll engine + reveals ---------- */
-let lenis=null;
-const prog=document.getElementById("progress");
-function onScroll(){const m=document.documentElement.scrollHeight-innerHeight;prog.style.transform=`scaleX(${m>0?scrollY/m:0})`;
-  const secs=["lecture","table","switchboard","scoreboard","halflife","quiz"];let on=secs[0];secs.forEach(s=>{const el=document.getElementById(s);if(el.getBoundingClientRect().top<innerHeight*.4)on=s;});
-  document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+on));}
-addEventListener("scroll",onScroll,{passive:true});onScroll();
-function startMotion(){
-  if(!motion||!window.gsap)return;
-  gsap.registerPlugin(ScrollTrigger);
-  if(window.Lenis&&!lenis){lenis=new Lenis({lerp:.1});lenis.on("scroll",ScrollTrigger.update);gsap.ticker.add(t=>lenis&&lenis.raf(t*1000));gsap.ticker.lagSmoothing(0);}
-  gsap.utils.toArray(".reveal").forEach(el=>gsap.from(el,{y:28,opacity:.35,duration:.8,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 90%",once:true}}));
-  gsap.from(".tile",{y:24,opacity:.3,duration:.6,ease:"power3.out",stagger:.015,scrollTrigger:{trigger:"#grid",start:"top 85%",once:true}});
-  document.querySelectorAll("#wlChart rect.b").forEach((r,i)=>gsap.from(r,{attr:{width:0},duration:1.1,ease:"power3.out",delay:i*.08,scrollTrigger:{trigger:"#wlChart",start:"top 80%",once:true}}));
-  gsap.from("#title",{clipPath:"inset(0 100% 0 0)",duration:1.2,ease:"power2.inOut"});
+/* ---------- scroll engine: one Lenis, one loop (gsap.ticker), one velocity signal ---------- */
+gsap.registerPlugin(ScrollTrigger);
+gsap.ticker.lagSmoothing(0);
+history.scrollRestoration="manual";
+const engine={lenis:null,velocity:0,tick:null};
+let lenis=null;   // alias the modal uses to pause the page behind it
+function initScrollEngine(){
+  if(engine.lenis||!motion||!window.Lenis)return;
+  const l=new Lenis({duration:navigator.hardwareConcurrency<=4?.9:1.2,smoothWheel:true,autoRaf:false,anchors:false});
+  l.on("scroll",ScrollTrigger.update);
+  engine.tick=t=>{l.raf(t*1000);engine.velocity=l.velocity;};
+  gsap.ticker.add(engine.tick);
+  engine.lenis=lenis=l;
 }
-startMotion();
-document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener("click",e=>{const id=a.getAttribute("href").slice(1),el=document.getElementById(id);if(!el)return;e.preventDefault();lenis?lenis.scrollTo(el,{offset:-60}):el.scrollIntoView({behavior:motion?"smooth":"auto"});}));
-mt.onclick=()=>{motion=!motion;try{localStorage.setItem("pl-motion",motion?"1":"0");}catch(e){}syncMotion();
-  if(!motion&&lenis){lenis.destroy();lenis=null;} if(motion)startMotion();};
+function destroyScrollEngine(){
+  if(engine.tick)gsap.ticker.remove(engine.tick);
+  engine.lenis?.destroy();engine.lenis=lenis=null;engine.tick=null;engine.velocity=0;
+}
+// HUD: progress bar, scrollspy and the --v velocity var, all read once per tick (no scroll listeners)
+const progEl=document.getElementById("progress");
+const SECS=["lecture","soup","table","switchboard","toybox","scoreboard","halflife","quiz"].map(id=>document.getElementById(id));
+const navA=[...document.querySelectorAll(".nav a")];
+const clampV=gsap.utils.clamp(-1,1);
+let lastY=-1,vSm=0;
+gsap.ticker.add(()=>{
+  const tv=clampV(engine.velocity*.02);
+  if(Math.abs(tv-vSm)>.0005||vSm!==0){vSm+=(tv-vSm)*.2;if(Math.abs(vSm)<.002)vSm=0;document.documentElement.style.setProperty("--v",vSm.toFixed(3));}
+  const y=scrollY;if(y===lastY)return;lastY=y;
+  const m=document.documentElement.scrollHeight-innerHeight;
+  progEl.style.transform=`scaleX(${m>0?y/m:0})`;
+  let on=SECS[0].id;for(const s of SECS)if(s.getBoundingClientRect().top<innerHeight*.4)on=s.id;
+  navA.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+on));
+});
 
+let motionCtx=null;
+function startMotion(){
+  if(!motion||motionCtx)return;
+  initScrollEngine();
+  motionCtx=gsap.context(()=>{
+    gsap.utils.toArray(".reveal").forEach(el=>gsap.from(el,{y:28,opacity:.35,duration:.8,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 90%",once:true}}));
+    gsap.from(".tile",{y:24,opacity:.3,duration:.6,ease:"power3.out",stagger:.015,scrollTrigger:{trigger:"#grid",start:"top 85%",once:true}});
+    document.querySelectorAll("#wlChart rect.b").forEach((r,i)=>gsap.from(r,{attr:{width:0},duration:1.1,ease:"power3.out",delay:i*.08,scrollTrigger:{trigger:"#wlChart",start:"top 80%",once:true}}));
+    gsap.from("#title",{clipPath:"inset(0 100% 0 0)",duration:1.2,ease:"power2.inOut"});
+    // scrubs write plain progress objects; the render loops read them
+    gsap.to(heroProg,{v:1,ease:"none",scrollTrigger:{trigger:"#lecture",start:"top top",end:"bottom top",scrub:1,invalidateOnRefresh:true}});
+    gsap.to(soup.blend,{t:1,ease:"none",scrollTrigger:{trigger:"#soupBox",start:"top 85%",end:"center 50%",scrub:1,invalidateOnRefresh:true}});
+  });
+}
+function setMotion(on){
+  motion=on;try{localStorage.setItem("pl-motion",on?"1":"0");}catch(e){}
+  syncMotion();
+  if(on){startMotion();return;}
+  motionCtx?.revert();motionCtx=null;destroyScrollEngine();
+  heroProg.v=0;soup.blend.t=1;soup.settle();
+}
+mt.onclick=()=>setMotion(!motion);
+matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change",e=>{if(e.matches)setMotion(false);});
+async function refreshWhenMeasurable(){await document.fonts.ready;soup.resize();ScrollTrigger.refresh();}
+let rT=0,lastW=innerWidth;
+addEventListener("resize",()=>{if(innerWidth===lastW)return;lastW=innerWidth;clearTimeout(rT);rT=setTimeout(()=>{soup.resize();toy.resize();ScrollTrigger.refresh();},250);});
+document.addEventListener("click",e=>{
+  const a=e.target.closest('a[href^="#"]');if(!a)return;
+  const t=document.getElementById(a.getAttribute("href").slice(1));if(!t)return;
+  e.preventDefault();
+  engine.lenis?engine.lenis.scrollTo(t,{offset:-70,duration:1.1}):t.scrollIntoView();
+  t.setAttribute("tabindex","-1");t.focus({preventScroll:true});
+});
+
+/* ---------- drag core: pointer capture, axis lock, release velocity ---------- */
+function drag(el,{axis="free",threshold=8,touchAction,touchOnly=false,onStart,onMove,onEnd,onCancel}={}){
+  el.style.touchAction=touchAction??(axis==="x"?"pan-y":axis==="y"?"pan-x":"none");
+  let id=null,sx=0,sy=0,live=false,pts=[];
+  const release=()=>{if(id!==null&&el.hasPointerCapture?.(id))el.releasePointerCapture(id);id=null;live=false;};
+  const cap=pid=>{try{el.setPointerCapture(pid);}catch(_){}};   // the pointer may already be gone
+  const on={
+    pointerdown(e){
+      if(id!==null||(e.pointerType==="mouse"&&(touchOnly||e.button!==0)))return;
+      id=e.pointerId;sx=e.clientX;sy=e.clientY;live=false;pts=[{x:sx,y:sy,t:e.timeStamp}];
+      // mouse/pen capture now so a fast drag cannot outrun the element; touch is implicitly
+      // captured to the child it landed on, so it defers capture and taps still click children
+      if(e.pointerType!=="touch")cap(id);
+    },
+    pointermove(e){
+      if(e.pointerId!==id)return;
+      const dx=e.clientX-sx,dy=e.clientY-sy;
+      if(!live){
+        if(Math.abs(dx)<threshold&&Math.abs(dy)<threshold)return;
+        if(axis!=="free"&&(Math.abs(dx)>Math.abs(dy)?"x":"y")!==axis){release();onCancel?.();return;}
+        if(onStart?.({x:sx,y:sy,e})===false){release();onCancel?.();return;}
+        live=true;if(!el.hasPointerCapture(id))cap(id);
+      }
+      pts.push({x:e.clientX,y:e.clientY,t:e.timeStamp});if(pts.length>6)pts.shift();
+      onMove?.({dx,dy,e});
+    },
+    pointerup(e){if(e.pointerId!==id)return;const was=live,dx=e.clientX-sx,dy=e.clientY-sy;release();if(was)onEnd?.({dx,dy,...relVel(pts)});},
+    pointercancel(e){if(e.pointerId!==id)return;const was=live;release();if(was)onCancel?.();}
+  };
+  for(const k in on)el.addEventListener(k,on[k]);
+  return()=>{release();for(const k in on)el.removeEventListener(k,on[k]);};
+}
+// px per second over the last 100ms only, so a flick reads as a flick
+function relVel(pts){
+  const last=pts.at(-1)??{x:0,y:0,t:0},first=pts.find(p=>last.t-p.t<=100)??pts[0]??last,dt=Math.max(last.t-first.t,1);
+  return{vx:(last.x-first.x)/dt*1000,vy:(last.y-first.y)/dt*1000};
+}
+function mulberry32(seed){return()=>{seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+
+/* ---------- bench gestures: swipe sideways for next, pull the handle down to close ---------- */
+const bench=document.querySelector(".bench");
+drag(mData,{axis:"x",touchOnly:true,threshold:12,
+  onMove:({dx})=>{mData.style.transform=`translate3d(${dx*.35}px,0,0)`;},
+  onEnd:({dx,vx})=>{mData.style.transform="";if(!cur)return;
+    if(Math.abs(dx)>mData.clientWidth*.25||Math.abs(vx)>500)openPep(dx<0?P[cur.i%P.length].id:P[(cur.i-2+P.length)%P.length].id);},
+  onCancel:()=>{mData.style.transform="";}});
+let unGrab=null;
+function bindGrab(el){
+  unGrab?.();
+  unGrab=drag(el,{axis:"y",touchAction:"none",threshold:4,
+    onMove:({dy})=>{if(dy>0)bench.style.transform=`translate3d(0,${dy}px,0)`;},
+    onEnd:({dy,vy})=>{if(dy>bench.clientHeight*.22||vy>700)closePep();else bench.style.transform="";},
+    onCancel:()=>{bench.style.transform="";}});
+}
+
+/* ---------- drag-to-confirm capsule (the knob is a real button) ---------- */
+function dragToConfirm(track,commit){
+  const knob=track.querySelector("[data-knob]");let travel=0,fired=false;
+  const setP=p=>track.style.setProperty("--p",p.toFixed(4));
+  const finish=()=>{if(fired)return;fired=true;setP(1);track.dataset.state="done";commit();};
+  knob.addEventListener("click",finish);
+  const snap=from=>motion?gsap.to({p:from},{p:0,duration:.35,ease:"power3.out",onUpdate(){setP(this.targets()[0].p);}}):setP(0);
+  return drag(knob,{axis:"x",threshold:4,
+    onStart:()=>{travel=track.clientWidth-knob.offsetWidth-8;track.style.setProperty("--travel",travel+"px");track.dataset.state="dragging";},
+    onMove:({dx})=>setP(Math.min(Math.max(dx/travel,0),1)),
+    onEnd:({dx,vx})=>{const p=Math.min(Math.max(dx/travel,0),1);track.dataset.state="";if(p>.92||(p>.5&&vx>600))finish();else snap(p);},
+    onCancel:()=>{track.dataset.state="";snap(Number(track.style.getPropertyValue("--p"))||0);}});
+}
+function quizGate(){
+  qcard.innerHTML=`<p class="eyebrow">Pop quiz</p><p class="qq">Five questions on which hormones each peptide switches up or down. Ready?</p>
+  <div class="capsule" id="cap"><span class="capsule__label" aria-hidden="true">slide to start →</span><button class="capsule__knob" data-knob type="button">Start quiz</button></div>`;
+  dragToConfirm(document.getElementById("cap"),()=>setTimeout(newQuiz,motion?320:0));
+}
+
+/* ---------- warm-up: the amino acid soup (Canvas 2D particle field) ---------- */
+const soup=(()=>{
+  const box=document.getElementById("soupBox"),cv=document.getElementById("soupCanvas"),ctx=cv.getContext("2d");
+  const wordEl=document.getElementById("soupWord");
+  const small=matchMedia("(max-width:820px)").matches||!matchMedia("(pointer:fine)").matches;
+  const N=small?1800:5200,TAU=Math.PI*2,rand=mulberry32(20261028);
+  const P_=new Float32Array(N*4),A=new Float32Array(N*2),B=new Float32Array(N*2);
+  // residue classes weighted roughly by natural abundance
+  const CLS=[["hydrophobic",.38],["polar",.2],["positive",.14],["negative",.12],["special",.13],["sulfur",.03]];
+  const groups=CLS.map(()=>[]);
+  for(let i=0;i<N;i++){let r=rand(),g=0;while(g<CLS.length-1&&(r-=CLS[g][1])>0)g++;groups[g].push(i);}
+  const G=groups.map(a=>Uint16Array.from(a));
+  const blend={t:0},force={v:0},pointer={x:-1e4,y:-1e4,power:0};
+  let w=0,h=0,R=120,word="PEPTIDE",live=false,built=false;
+  document.getElementById("soupCount").textContent=N.toLocaleString()+" amino acids";
+  function soupTargets(){const r=mulberry32(7);for(let i=0;i<N;i++){A[i*2]=r()*w;A[i*2+1]=r()*h;}}
+  function wordTargets(text){
+    const c=document.createElement("canvas");c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));
+    const x=c.getContext("2d",{willReadFrequently:true});
+    const fs=Math.min(h*.5,w/(text.length*.66));
+    x.font=`700 ${fs}px "Cabin Sketch","Atkinson Hyperlegible",sans-serif`;x.textAlign="center";x.textBaseline="middle";
+    x.fillStyle="#fff";x.fillText(text,c.width/2,c.height/2);
+    const d=x.getImageData(0,0,c.width,c.height).data,hits=[];
+    for(let y=0;y<c.height;y+=2)for(let xx=0;xx<c.width;xx+=2)if(d[(y*c.width+xx)*4+3]>128)hits.push(xx,y);
+    const n=hits.length/2,r=mulberry32(11),glyphs=Math.round(N*.8);   // 80% of the budget goes to legibility
+    for(let i=0;i<N;i++){
+      if(i<glyphs&&n){const k=(r()*n)|0;B[i*2]=hits[k*2]+(r()-.5)*1.5;B[i*2+1]=hits[k*2+1]+(r()-.5)*1.5;}
+      else{B[i*2]=A[i*2];B[i*2+1]=A[i*2+1];}
+    }
+  }
+  function resize(){
+    w=box.clientWidth;h=box.clientHeight;if(!w||!h)return;
+    const dpr=Math.min(devicePixelRatio,2);cv.width=w*dpr;cv.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    R=Math.max(60,Math.min(w,h)*.24);
+    soupTargets();wordTargets(word);
+    if(!built){for(let i=0;i<N;i++){P_[i*4]=A[i*2];P_[i*4+1]=A[i*2+1];}built=true;}
+    if(!motion)settle();
+  }
+  const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  function step(dt){
+    const t=ease(Math.max(blend.t,force.v)),jit=(1-t)*.35;
+    for(let i=0;i<N;i++){
+      const i4=i*4,i2=i*2,hx=A[i2]+(B[i2]-A[i2])*t,hy=A[i2+1]+(B[i2+1]-A[i2+1])*t;
+      let vx=(P_[i4+2]+(hx-P_[i4])*6*dt)*.92,vy=(P_[i4+3]+(hy-P_[i4+1])*6*dt)*.92;
+      if(pointer.power>.01){
+        const dx=P_[i4]-pointer.x,dy=P_[i4+1]-pointer.y,d2=dx*dx+dy*dy;
+        if(d2<R*R){const d=Math.sqrt(d2)+.001,f=1-d/R,k=(900*f*f*pointer.power*dt)/d;vx+=dx*k;vy+=dy*k;}
+      }
+      if(jit>0){vx+=(Math.random()-.5)*jit;vy+=(Math.random()-.5)*jit;}   // brownian motion while loose
+      P_[i4+2]=vx;P_[i4+3]=vy;P_[i4]+=vx;P_[i4+1]+=vy;
+    }
+    pointer.power*=.94;
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);const r=small?1.5:1.25;
+    G.forEach((idx,g)=>{
+      ctx.beginPath();
+      for(let k=0;k<idx.length;k++){const i4=idx[k]*4;ctx.moveTo(P_[i4]+r,P_[i4+1]);ctx.arc(P_[i4],P_[i4+1],r,0,TAU);}
+      ctx.fillStyle=RC[CLS[g][0]];ctx.fill();
+    });
+  }
+  function settle(){
+    const t=Math.max(blend.t,force.v);
+    for(let i=0;i<N;i++){P_[i*4]=A[i*2]+(B[i*2]-A[i*2])*t;P_[i*4+1]=A[i*2+1]+(B[i*2+1]-A[i*2+1])*t;P_[i*4+2]=P_[i*4+3]=0;}
+    draw();
+  }
+  function tick(time,dms){if(!live||!motion)return;step(Math.min(dms/1000,1/30));draw();}
+  function burst(bx,by,gain=2600){
+    for(let i=0;i<N;i++){const i4=i*4,dx=P_[i4]-bx,dy=P_[i4+1]-by,d=Math.hypot(dx,dy)+8;P_[i4+2]+=(dx/d)*(gain/d);P_[i4+3]+=(dy/d)*(gain/d);}
+  }
+  cv.addEventListener("pointermove",e=>{const b=cv.getBoundingClientRect();pointer.x=e.clientX-b.left;pointer.y=e.clientY-b.top;pointer.power=1;},{passive:true});
+  cv.addEventListener("pointerleave",()=>{pointer.power=0;});
+  cv.addEventListener("pointerdown",e=>{if(!motion)return;const b=cv.getBoundingClientRect();burst(e.clientX-b.left,e.clientY-b.top);});
+  new IntersectionObserver(([e])=>{live=e.isIntersecting;},{rootMargin:"80px"}).observe(box);
+  gsap.ticker.add(tick);
+  document.getElementById("soupWords").addEventListener("click",e=>{
+    const b=e.target.closest("[data-w]");if(!b)return;
+    document.querySelectorAll("#soupWords .chip").forEach(c=>c.setAttribute("aria-pressed",c===b));
+    word=b.dataset.w;wordEl.textContent=word;wordTargets(word);
+    if(motion)gsap.to(force,{v:1,duration:.9,ease:"power2.out"});else{force.v=1;settle();}
+  });
+  return{blend,resize,settle};
+})();
+
+/* ---------- lab practical: matter-js toy box, chips are DOM nodes driven by body transforms ---------- */
+const toy=(()=>{
+  const box=document.getElementById("box"),hint=document.getElementById("boxHint");
+  if(!window.Matter){hint.textContent="The physics engine did not load. Everything else in the lab works.";return{resize(){}};}
+  const {Engine,Bodies,Composite,Body,Constraint}=Matter;
+  const eng=Engine.create({gravity:{y:1},positionIterations:6,velocityIterations:4});
+  const cap=matchMedia("(max-width:820px)").matches?40:120,rand=mulberry32(214);
+  let W=0,H=0,walls=[],items=[],live=false,held=null,awakeUntil=0,acc=0,rect=null;
+  function resize(){
+    W=box.clientWidth;H=box.clientHeight;Composite.remove(eng.world,walls);const t=400;
+    walls=[Bodies.rectangle(W/2,H+t/2,W*3,t,{isStatic:true}),Bodies.rectangle(-t/2,H/2,t,H*6,{isStatic:true}),Bodies.rectangle(W+t/2,H/2,t,H*6,{isStatic:true})];
+    Composite.add(eng.world,walls);
+  }
+  resize();
+  function remove(it){Composite.remove(eng.world,it.b);it.el.remove();items=items.filter(x=>x!==it);}
+  function render(){
+    for(const it of items){
+      const {x,y}=it.b.position;
+      if(y>H*3||x<-200||x>W+200){remove(it);continue;}
+      it.el.style.transform=`translate3d(${x-it.w/2}px,${y-20}px,0) rotate(${it.b.angle}rad)`;
+    }
+  }
+  function pour(p){
+    hint.hidden=true;const seq=p.q.replace("|","");
+    [...seq].forEach((ch,i)=>{
+      if(items.length>=cap)remove(items[0]);
+      const name=AA[ch][0]==="Modified"?"X":AA[ch][0],wid=ch==="X"?44:58;
+      const b=Bodies.rectangle(30+rand()*(W-60),-50-i*30,wid,40,{chamfer:{radius:20},restitution:.32,friction:.28,frictionAir:.012,density:.0012*(.55+(SIZE[ch]??.6))});
+      Body.setAngle(b,(rand()-.5)*1.2);
+      const el=document.createElement("div");el.className="res";el.style.width=wid+"px";el.style.background=RC[AA[ch][1]];
+      el.textContent=name;el.title=`${name} ${i+1} of ${p.n}`;box.append(el);
+      const it={b,el,w:wid};items.push(it);Composite.add(eng.world,b);bindChip(it);
+    });
+    awakeUntil=performance.now()+4000;
+    if(!motion){for(let k=0;k<260;k++)Engine.update(eng,1000/60);}
+    render();
+  }
+  function bindChip(it){
+    let ox=0,oy=0;
+    drag(it.el,{threshold:3,
+      onStart:({x,y})=>{rect=box.getBoundingClientRect();ox=x-rect.left;oy=y-rect.top;lenis?.stop();
+        held=Constraint.create({pointA:{x:ox,y:oy},bodyB:it.b,pointB:{x:0,y:0},stiffness:.18,damping:.08,length:0});Composite.add(eng.world,held);},
+      onMove:({dx,dy})=>{if(held){held.pointA={x:ox+dx,y:oy+dy};awakeUntil=performance.now()+2500;}},
+      onEnd:({vx,vy})=>{if(held)Composite.remove(eng.world,held);held=null;lenis?.start();
+        const c=gsap.utils.clamp(-35,35);Body.setVelocity(it.b,{x:c(vx/60),y:c(vy/60)});awakeUntil=performance.now()+3000;},
+      onCancel:()=>{if(held)Composite.remove(eng.world,held);held=null;lenis?.start();}});
+  }
+  // fixed 60Hz steps on the shared ticker, capped at 3 catch-up steps so a stalled tab cannot tunnel chips
+  gsap.ticker.add((time,dms)=>{
+    if(!live||!items.length)return;
+    if(!motion&&!held&&performance.now()>awakeUntil)return;
+    acc=Math.min(acc+dms,50);let n=0;
+    while(acc>=1000/60&&n<3){Engine.update(eng,1000/60);acc-=1000/60;n++;}
+    render();
+  });
+  new IntersectionObserver(([e])=>{live=e.isIntersecting;},{rootMargin:"60px"}).observe(box);
+  document.getElementById("pour").addEventListener("click",e=>{
+    const b=e.target.closest("[data-p]");if(!b)return;
+    if(b.dataset.p==="empty"){[...items].forEach(remove);hint.hidden=false;return;}
+    pour(byId[b.dataset.p]);
+  });
+  return{resize};
+})();
+
+quizGate();
+startMotion();
+refreshWhenMeasurable();
 say(document.getElementById("bubble1"),document.getElementById("prof1"),INTRO);
 const h0=location.hash.slice(1);if(h0.startsWith("pep-")&&byId[h0.slice(4)])openPep(h0.slice(4));
 </script>
