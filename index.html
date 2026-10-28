@@ -1,0 +1,775 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Peptide Lab 101</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&family=Kalam:wght@400;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one continuous classroom chalkboard; professor lectures at the top, chapters below, a lab-bench modal for each molecule. Deliberately single-theme (a chalkboard is always dark). */
+:root{
+  --board:#1d3a31; --board-2:#16302a; --board-3:#24463b;
+  --chalk:#f1efe6; --chalk-dim:#b7c4b9; --chalk-faint:rgba(241,239,230,.16);
+  --yellow:#f3d36b; --pink:#f29bb3; --blue:#8fc8f0; --orange:#f2a65a; --lav:#c7b5f2; --lime:#b8e07a; --coral:#f28b82; --teal:#7fd6d6; --bone:#e8dfbf; --sulfur:#d8e86a; --mod:#c7a0ff;
+  --wood:#6e4325; --wood-2:#8a5a33;
+  --up:#9be0b5; --down:#f28b82;
+  --f-display:"Cabin Sketch","Comic Sans MS",cursive;
+  --f-hand:"Kalam","Segoe Print","Bradley Hand",cursive;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:auto}
+body{
+  background:var(--board);
+  color:var(--chalk);
+  font-family:var(--f-body);
+  font-size:16px; line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  background-image:
+    radial-gradient(ellipse at 18% 8%,rgba(255,255,255,.07),transparent 45%),
+    radial-gradient(ellipse at 82% 40%,rgba(255,255,255,.045),transparent 50%),
+    radial-gradient(ellipse at 40% 90%,rgba(255,255,255,.04),transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment:fixed;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--board-2)}
+a{color:var(--yellow)}
+:focus-visible{outline:2px dashed var(--yellow);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;text-wrap:balance;letter-spacing:.01em;margin:0}
+h2{font-size:clamp(1.9rem,4.4vw,2.9rem);line-height:1.05}
+h3{font-size:1.35rem}
+.eyebrow{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk-dim)}
+.chalk{text-shadow:0 0 1px rgba(255,255,255,.45),0 0 12px rgba(255,255,255,.06)}
+.hand{font-family:var(--f-hand)}
+.muted{color:var(--chalk-dim)}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:linear-gradient(var(--wood-2),var(--wood));box-shadow:0 2px 0 #4c2d17,0 8px 24px rgba(0,0,0,.35)}
+.bar-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{font-family:var(--f-display);font-size:1.3rem;color:var(--chalk);text-decoration:none;white-space:nowrap}
+.nav{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+.nav a{font-family:var(--f-hand);color:var(--chalk);text-decoration:none;padding:4px 10px;border-radius:999px;font-size:1rem}
+.nav a:hover,.nav a.on{background:rgba(0,0,0,.25)}
+.toggle{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.28);color:var(--chalk);border:1px solid rgba(241,239,230,.25);border-radius:999px;padding:7px 12px;cursor:pointer;min-height:36px}
+.toggle[aria-pressed="false"]{opacity:.65}
+.progress{position:absolute;left:0;bottom:-3px;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--yellow);box-shadow:0 0 8px var(--yellow)}
+@media (max-width:720px){.nav{display:none}}
+
+section{padding-block:clamp(48px,8vw,96px)}
+.sec-head{display:grid;gap:10px;margin-bottom:28px;max-width:760px}
+.sec-head p{margin:0;color:var(--chalk-dim);max-width:65ch}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(20px,4vw,48px);align-items:center;padding-top:clamp(28px,5vw,56px)}
+@media (max-width:880px){.hero{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(3rem,9vw,6.4rem);line-height:.92;margin-top:6px}
+.hero h1 span{display:block;color:var(--yellow)}
+.lead{font-size:1.12rem;max-width:56ch;color:var(--chalk)}
+.prof-row{display:flex;gap:14px;align-items:flex-end;margin-top:22px}
+.prof{width:132px;flex:none}
+.prof svg{width:100%;height:auto;display:block}
+.prof .mouth{transform-box:fill-box;transform-origin:50% 50%}
+.prof.talking .mouth{animation:talk .18s infinite alternate}
+@keyframes talk{to{transform:scaleY(2.4)}}
+.prof .lids{animation:blink 5s infinite;transform-box:fill-box;transform-origin:50% 50%}
+@keyframes blink{0%,94%,100%{transform:scaleY(0)}96%{transform:scaleY(1)}}
+.bubble{position:relative;flex:1;min-width:0;background:var(--chalk);color:#1b2a24;font-family:var(--f-hand);font-size:1.08rem;line-height:1.45;padding:14px 18px;border-radius:18px 18px 18px 4px;box-shadow:4px 5px 0 rgba(0,0,0,.25);min-height:96px;cursor:pointer}
+.bubble::before{content:"";position:absolute;left:-12px;bottom:10px;border:8px solid transparent;border-right:12px solid var(--chalk);border-left:0}
+.bubble b{color:#7a2f12}
+.bubble .who{display:block;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#56665e;margin-bottom:2px}
+.hero-stage{position:relative;aspect-ratio:1/1;max-width:100%;max-height:560px;width:100%;border-radius:8px}
+.hero-stage canvas{width:100%;height:100%;display:block;cursor:grab}
+.stage-cap{position:absolute;left:12px;bottom:10px;right:12px;display:flex;justify-content:space-between;gap:10px;font-family:var(--f-hand);color:var(--chalk-dim);font-size:.95rem;pointer-events:none}
+.stats{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px}
+.stat b{display:block;font-family:var(--f-display);font-size:2.2rem;line-height:1;color:var(--yellow)}
+.stat span{font-size:.82rem;color:var(--chalk-dim)}
+
+/* periodic table */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.chip{font-family:var(--f-hand);font-size:1rem;background:transparent;color:var(--chalk);border:1.5px solid var(--chalk-faint);border-radius:999px;padding:5px 13px;cursor:pointer;min-height:38px;display:inline-flex;align-items:center;gap:7px;transition:background .2s,border-color .2s}
+.chip:hover{border-color:var(--chalk-dim)}
+.chip[aria-pressed="true"]{background:var(--chalk);color:#1b2a24;border-color:var(--chalk)}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.search{font-family:var(--f-hand);font-size:1.05rem;background:rgba(0,0,0,.18);color:var(--chalk);border:1.5px solid var(--chalk-faint);border-radius:999px;padding:7px 16px;min-height:40px;width:min(280px,100%)}
+.search::placeholder{color:var(--chalk-dim)}
+select.search{width:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(142px,1fr));gap:10px}
+.tile{position:relative;text-align:left;background:rgba(255,255,255,.035);color:var(--chalk);border:1.5px solid var(--chalk-faint);border-radius:7px 4px 8px 5px;padding:10px 12px 12px;cursor:pointer;min-height:150px;display:flex;flex-direction:column;gap:2px;font:inherit;transition:border-color .25s,background .25s,transform .35s var(--ease);will-change:transform}
+.tile:hover{border-color:var(--c);background:rgba(255,255,255,.06)}
+.tile .no{font-family:var(--f-mono);font-size:.72rem;color:var(--chalk-dim);display:flex;justify-content:space-between}
+.tile .sym{font-family:var(--f-display);font-size:2.6rem;line-height:1;color:var(--c);margin-top:4px}
+.tile .nm{font-weight:700;font-size:.92rem;line-height:1.2}
+.tile .meta{font-family:var(--f-mono);font-size:.68rem;color:var(--chalk-dim);margin-top:auto;padding-right:62px}
+.tile .st{position:absolute;right:10px;bottom:10px;font-family:var(--f-mono);font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:1px solid currentColor}
+.tile.hide{display:none}
+.empty{font-family:var(--f-hand);font-size:1.2rem;color:var(--chalk-dim);padding:20px 0}
+
+/* status colors */
+.s-fda{color:var(--up)} .s-inv{color:var(--yellow)} .s-res{color:var(--coral)} .s-limbo{color:var(--orange)} .s-intl{color:var(--blue)} .s-endo{color:var(--chalk-dim)} .s-disc{color:var(--lav)}
+
+/* switchboard */
+.board-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:28px}
+@media (max-width:820px){.board-split{grid-template-columns:1fr}}
+.hormones{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.hormones .chip b{font-family:var(--f-mono);font-size:.7rem;opacity:.7}
+.lever{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.lever{grid-template-columns:1fr}}
+.col{border:1.5px dashed var(--chalk-faint);border-radius:10px;padding:14px;min-width:0}
+.col h3{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.col.up h3{color:var(--up)} .col.down h3{color:var(--down)}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{font-family:var(--f-body);font-size:.88rem;background:rgba(255,255,255,.05);color:var(--chalk);border:1px solid var(--chalk-faint);border-radius:6px;padding:5px 9px;cursor:pointer;min-height:34px}
+.pchip:hover{border-color:var(--chalk)}
+.pchip small{color:var(--chalk-dim);font-family:var(--f-mono);font-size:.68rem}
+.hname{font-family:var(--f-display);font-size:2.4rem;color:var(--yellow);margin:0 0 4px}
+
+/* charts */
+.chart-box{overflow-x:auto;border:1.5px solid var(--chalk-faint);border-radius:10px;padding:16px;background:rgba(0,0,0,.08)}
+.chart-box svg{display:block;width:100%;min-width:620px;height:auto}
+.chart-box text{font-family:var(--f-body);fill:var(--chalk)}
+.chart-box .tick{font-family:var(--f-mono);font-size:11px;fill:var(--chalk-dim)}
+.chart-box .grid-l{stroke:var(--chalk-faint);stroke-dasharray:3 5}
+.bar-g{cursor:pointer}
+.bar-g:hover rect.b{filter:brightness(1.15)}
+.note{font-size:.85rem;color:var(--chalk-dim);margin-top:12px;max-width:80ch}
+.dot{cursor:pointer;transition:transform .2s}
+.dot:hover circle{stroke:var(--chalk);stroke-width:2}
+
+/* quiz */
+.quiz{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:700px){.quiz{grid-template-columns:1fr}.quiz .prof{width:96px}}
+.qcard{border:1.5px solid var(--chalk-faint);border-radius:12px;padding:20px;background:rgba(0,0,0,.1)}
+.qprog{display:flex;gap:6px;margin-bottom:14px}
+.qprog i{flex:1;height:5px;border-radius:3px;background:var(--chalk-faint)}
+.qprog i.done{background:var(--yellow)}
+.qq{font-family:var(--f-hand);font-size:1.4rem;line-height:1.3;margin:0 0 14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.opts{grid-template-columns:1fr}}
+.opt{font:inherit;font-size:1rem;text-align:left;background:rgba(255,255,255,.05);color:var(--chalk);border:1.5px solid var(--chalk-faint);border-radius:8px;padding:12px 14px;cursor:pointer;min-height:48px}
+.opt:hover:not(:disabled){border-color:var(--chalk)}
+.opt.right{border-color:var(--up);background:rgba(155,224,181,.14)}
+.opt.wrong{border-color:var(--down);background:rgba(242,139,130,.12)}
+.btn{font-family:var(--f-hand);font-size:1.1rem;background:var(--yellow);color:#1b2a24;border:0;border-radius:999px;padding:10px 20px;cursor:pointer;min-height:44px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.25)}
+.btn.ghost{background:transparent;color:var(--chalk);border:1.5px solid var(--chalk-faint);box-shadow:none}
+
+footer{padding-block:40px 60px;border-top:1.5px dashed var(--chalk-faint);font-size:.88rem;color:var(--chalk-dim)}
+footer ul{padding-left:18px;margin:8px 0 0}
+.disclaim{font-family:var(--f-hand);font-size:1.05rem;color:var(--chalk);max-width:70ch}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 12px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px));background:rgba(8,18,15,.72);backdrop-filter:blur(6px)}
+.bench{position:relative;width:min(1180px,100%);height:min(860px,100%);background:var(--board-3);border:10px solid var(--wood);border-radius:12px;box-shadow:inset 0 0 0 2px #4c2d17,0 30px 80px rgba(0,0,0,.6);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);overflow:hidden;
+  background-image:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.07),transparent 50%)}
+@media (max-width:860px){.bench{grid-template-columns:1fr;grid-template-rows:42% 58%;border-width:6px}}
+.stage{position:relative;min-height:0;border-right:1.5px dashed var(--chalk-faint)}
+@media (max-width:860px){.stage{border-right:0;border-bottom:1.5px dashed var(--chalk-faint)}}
+.stage canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+.stage canvas:active{cursor:grabbing}
+.stage .ctrl{position:absolute;right:10px;top:58px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:520px){.prof-row .prof{width:80px}.stage-title{display:none}}
+.ibtn{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.35);color:var(--chalk);border:1px solid var(--chalk-faint);font-family:var(--f-mono);font-size:1rem;cursor:pointer;display:grid;place-items:center}
+.ibtn:hover{border-color:var(--chalk)}
+.legend{position:absolute;left:10px;bottom:10px;right:10px;display:flex;flex-wrap:wrap;gap:4px 12px;font-family:var(--f-mono);font-size:.66rem;color:var(--chalk-dim);pointer-events:none}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.stage-title{position:absolute;left:14px;top:10px;font-family:var(--f-hand);color:var(--chalk-dim);font-size:.95rem;pointer-events:none}
+.tip{position:fixed;z-index:120;pointer-events:none;background:var(--chalk);color:#1b2a24;font-family:var(--f-mono);font-size:.74rem;padding:5px 8px;border-radius:6px;box-shadow:2px 2px 0 rgba(0,0,0,.3);white-space:nowrap}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;font-family:var(--f-hand);color:var(--chalk-dim)}
+.data{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:18px 20px 28px;display:flex;flex-direction:column;gap:18px}
+.dhead{display:flex;gap:14px;align-items:flex-start}
+.dhead .el{flex:none;width:78px;height:84px;border:2px solid var(--c);border-radius:6px;display:grid;place-items:center;font-family:var(--f-display);font-size:2.3rem;color:var(--c);position:relative}
+.dhead .el small{position:absolute;top:3px;left:6px;font-family:var(--f-mono);font-size:.62rem;color:var(--chalk-dim)}
+.dhead h2{font-size:clamp(1.6rem,3.4vw,2.3rem)}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pill{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid currentColor}
+.close{position:absolute;top:8px;right:8px;z-index:5}
+.mini-prof{display:flex;gap:10px;align-items:flex-start}
+.mini-prof .prof{width:64px}
+.mini-prof .bubble{font-size:1rem;min-height:0;padding:10px 14px}
+.seq{display:flex;flex-wrap:wrap;gap:3px}
+.aa{font-family:var(--f-mono);font-size:.78rem;width:24px;height:26px;display:grid;place-items:center;border-radius:4px;color:#17251f;font-weight:600;cursor:default}
+.aa.brk{background:transparent;width:12px}
+.blk h3{font-family:var(--f-hand);font-weight:700;font-size:1.15rem;color:var(--yellow);margin-bottom:6px}
+.blk p,.blk ul{margin:0}
+.blk ul{padding-left:18px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.94rem}
+.kv dt{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--chalk-dim);padding-top:3px}
+.kv dd{margin:0;min-width:0}
+.fx{display:grid;grid-template-columns:120px 1fr 34px;gap:6px 10px;align-items:center;font-size:.86rem}
+.fx .track{position:relative;height:12px;border-radius:6px;background:rgba(255,255,255,.05)}
+.fx .track::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1.5px;background:var(--chalk-dim)}
+.fx .fill{position:absolute;top:0;bottom:0;border-radius:6px;transition:width .6s var(--ease),left .6s var(--ease)}
+.fx .v{font-family:var(--f-mono);font-size:.75rem;color:var(--chalk-dim);text-align:right}
+.navrow{display:flex;justify-content:space-between;gap:10px}
+.reveal{will-change:transform}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="bar" id="top">
+  <div class="bar-in">
+    <a class="logo chalk" href="#lecture">Peptide Lab 101</a>
+    <nav class="nav" aria-label="Chapters">
+      <a href="#lecture">Lecture</a>
+      <a href="#table">Periodic table</a>
+      <a href="#switchboard">Hormone switchboard</a>
+      <a href="#scoreboard">Weight-loss scoreboard</a>
+      <a href="#halflife">Half-lives</a>
+      <a href="#quiz">Pop quiz</a>
+    </nav>
+    <button class="toggle" id="motionToggle" aria-pressed="true" title="Turn animation on or off">Chalk dust: on</button>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<main class="wrap">
+  <section id="lecture" class="hero" style="padding-bottom:24px">
+    <div>
+      <div class="eyebrow">Room 214 · Biochemistry · Fall 2026</div>
+      <h1 class="chalk" id="title">Peptide<span>Lab 101</span></h1>
+      <p class="lead">Short chains of amino acids that act as the body's text messages. Each one fits a receptor like a key in a lock, and most of them turn a hormone <b style="color:var(--up)">up</b> or turn one <b style="color:var(--down)">down</b>. Click any element on the table to build its molecule in 3D.</p>
+      <div class="prof-row">
+        <div class="prof" id="prof1"></div>
+        <div class="bubble" id="bubble1" role="status" aria-live="polite"><span class="who">Prof. Helix</span><span class="txt"></span></div>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="hero-stage reveal" id="heroStage">
+      <canvas id="heroCanvas" aria-label="Rotating 3D model of semaglutide"></canvas>
+      <div class="stage-cap"><span>On the board: semaglutide, 31 residues</span><span>drag to spin</span></div>
+    </div>
+  </section>
+
+  <section id="table">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Chapter 1</div>
+      <h2 class="chalk">The periodic table of peptides</h2>
+      <p>Forty-nine peptides grouped by the system they talk to. Color is the family, the badge is regulatory status, and the corner number counts amino acids. Tap a tile to open the lab bench.</p>
+    </div>
+    <div class="tools reveal">
+      <input class="search" id="q" type="search" placeholder="Search name, hormone, receptor" aria-label="Search peptides">
+      <select class="search" id="sort" aria-label="Sort peptides">
+        <option value="i">Sort: family</option>
+        <option value="name">Sort: A to Z</option>
+        <option value="h">Sort: half-life</option>
+        <option value="len">Sort: length</option>
+        <option value="ev">Sort: evidence</option>
+      </select>
+    </div>
+    <div class="tools reveal" id="filters" role="group" aria-label="Filter by family"></div>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" hidden>Nothing on the board matches that. Try a hormone name like "GH" or "cortisol".</p>
+  </section>
+
+  <section id="switchboard">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Chapter 2</div>
+      <h2 class="chalk">Hormone switchboard</h2>
+      <p>Pick a hormone or signal. The board splits every peptide on the table into the ones that turn it up and the ones that block or suppress it.</p>
+    </div>
+    <div class="board-split">
+      <div class="hormones reveal" id="hormones" role="group" aria-label="Hormones"></div>
+      <div class="reveal">
+        <p class="hname chalk" id="hname">GH</p>
+        <p class="muted" id="hdesc" style="margin:0 0 14px"></p>
+        <div class="lever">
+          <div class="col up"><h3>▲ Turns it up</h3><div class="pchips" id="hup"></div></div>
+          <div class="col down"><h3>▼ Blocks or suppresses</h3><div class="pchips" id="hdown"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="scoreboard">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Chapter 3 · Metabolic data</div>
+      <h2 class="chalk">Weight-loss scoreboard</h2>
+      <p>Mean body-weight change in each drug's pivotal trial at its top dose. Different trials, different lengths and populations, so read it as a map of the field, not a head-to-head race.</p>
+    </div>
+    <div class="chart-box reveal" id="wlChart"></div>
+    <p class="note">Sources: STEP-1 (semaglutide), SURMOUNT-1 (tirzepatide), TRIUMPH-1 (retatrutide, 2026), REDEFINE-1 (CagriSema and cagrilintide), SCALE (liraglutide), ATTAIN-1 (orforglipron, a small-molecule pill approved April 2026, shown for comparison), setmelanotide phase 3 in POMC deficiency (rare genetic obesity). In the head-to-head REDEFINE-4, CagriSema reached 23.0% vs 25.5% for tirzepatide and missed non-inferiority.</p>
+  </section>
+
+  <section id="halflife">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Chapter 4 · Pharmacokinetics</div>
+      <h2 class="chalk">How long each one lasts</h2>
+      <p>Plasma half-life on a log scale, from two minutes (native GLP-1) to almost two months (a degarelix depot). Nearly every long-acting drug here got there with one of three tricks: unnatural D-amino acids, a fatty-acid tail that rides on albumin, or a depot under the skin.</p>
+    </div>
+    <div class="chart-box reveal" id="hlChart"></div>
+  </section>
+
+  <section id="quiz">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Chapter 5</div>
+      <h2 class="chalk">Pop quiz</h2>
+      <p>Five questions, generated from the board. No grades, just bragging rights.</p>
+    </div>
+    <div class="quiz reveal">
+      <div class="prof" id="prof2"></div>
+      <div class="qcard" id="qcard"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="disclaim">Class rules: this is a chemistry lesson, not medical advice. No doses are given on purpose. Research-only peptides are unapproved, and grey-market vials are frequently mislabeled or contaminated. Talk to a licensed clinician before using anything on this board.</p>
+    <p style="margin-top:18px">Metabolic fingerprints are the professor's evidence-weighted summaries (-3 strongly lowers, +3 strongly raises), not measured values. Evidence grade: A = large randomized human trials, B = small or early human studies, C = mostly animal or cell data. Sequences use one-letter codes; X marks a non-standard residue (Aib, D-amino acids, naphthylalanine and similar). Status as of October 2026.</p>
+    <ul>
+      <li><a href="https://www.medscape.com/viewarticle/retatrutide-delivers-unprecedented-weight-loss-phase-3-2026a1000gl4" target="_blank" rel="noopener">Medscape: retatrutide TRIUMPH-1</a> · <a href="https://investor.lilly.com/news-releases/news-release-details/lillys-triple-agonist-retatrutide-successful-two-additional" target="_blank" rel="noopener">Lilly: TRIUMPH-2 and -3</a></li>
+      <li><a href="https://www.drugs.com/history/cagrisema.html" target="_blank" rel="noopener">Drugs.com: CagriSema status</a> · <a href="https://www.inderes.dk/en/releases/novo-nordisk-as-cagrisema-demonstrated-23percent-weight-loss-in-an-open-label-head-to-head-redefine-4-trial-in-people-with-obesity-the-primary-endpoint-was-not-achieved" target="_blank" rel="noopener">Novo Nordisk: REDEFINE-4</a></li>
+      <li><a href="https://www.healio.com/news/endocrinology/20260401/fda-approves-orforglipron-an-oral-glp1-for-adults-with-obesity" target="_blank" rel="noopener">Healio: orforglipron approval</a></li>
+      <li><a href="https://djholtlaw.com/regulatory-alert-the-legal-status-of-bpc-157-in-compounding-and-clinical-practice/" target="_blank" rel="noopener">BPC-157 regulatory status 2026</a> · <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11859134/" target="_blank" rel="noopener">BPC-157 literature review (PMC)</a></li>
+    </ul>
+  </footer>
+</main>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mName" data-lenis-prevent>
+  <div class="bench">
+    <button class="ibtn close" id="mClose" aria-label="Close lab bench">✕</button>
+    <div class="stage">
+      <canvas id="mCanvas" aria-label="3D peptide model"></canvas>
+      <div class="stage-title" id="mStageTitle"></div>
+      <div class="ctrl">
+        <button class="ibtn" id="zIn" aria-label="Zoom in">+</button>
+        <button class="ibtn" id="zOut" aria-label="Zoom out">−</button>
+        <button class="ibtn" id="rebuild" aria-label="Rebuild molecule">↻</button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="nogl" id="nogl" hidden>No WebGL on this device, so the 3D model is off. The full sequence and data are on the right.</div>
+    </div>
+    <div class="data" id="mData"></div>
+  </div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+/* ---------- data ---------- */
+const FAM={
+  inc:{n:"Incretins & metabolic",c:"#f3d36b"},
+  sst:{n:"Somatostatin family",c:"#8fc8f0"},
+  gnrh:{n:"GnRH & reproductive axis",c:"#f29bb3"},
+  gh:{n:"GH secretagogues",c:"#b8e07a"},
+  mc:{n:"Melanocortins",c:"#f2a65a"},
+  pit:{n:"Posterior pituitary",c:"#c7b5f2"},
+  bone:{n:"Bone & calcium",c:"#e8dfbf"},
+  rep:{n:"Repair & immune",c:"#f28b82"},
+  neuro:{n:"Neuro & longevity",c:"#7fd6d6"}
+};
+const STATUS={fda:"FDA approved",inv:"Investigational",res:"Research only",limbo:"Regulatory limbo",intl:"Approved outside US",endo:"Natural hormone",disc:"Brand discontinued"};
+const FX=["Appetite","Blood glucose","Fat mass","Lean mass","GH / IGF-1","Tissue repair","Inflammation","Bone density"];
+const GI=["Nausea, vomiting, constipation","Gallbladder events","Pancreatitis (rare)","Boxed warning: thyroid C-cell tumors in rodents"];
+
+const P=[
+/* incretins & metabolic */
+{id:"glp1",n:"GLP-1 (7-37)",s:"Gl",c:"inc",q:"HAEGTFTSDVSSYLEGQAAKEFIAWLVKGRG",r:"GLP-1 receptor (GLP-1R)",up:["Insulin"],dn:["Glucagon","Ghrelin"],f:["Glucose-dependent insulin release","Slows stomach emptying","Fullness signal to the hypothalamus"],hl:"about 2 min (DPP-4 cleaves it)",h:.033,rt:"Made by intestinal L-cells after meals",st:"endo",ev:"A",m:[-2,-2,-1,0,0,0,0,0],se:[],say:"This is the template every blockbuster weight-loss drug copied. Nature's version lasts about two minutes before the enzyme DPP-4 snips it after residue 2. Watch that second residue: chemists spent 30 years protecting it."},
+{id:"sema",n:"Semaglutide",s:"Sm",c:"inc",q:"HXEGTFTSDVSSYLEGQAAKEFIAWLVRGRG",mods:"Aib at position 2 (DPP-4 shield), C18 fatty diacid on Lys26 (albumin binding), Lys34 to Arg",r:"GLP-1 receptor (GLP-1R)",up:["Insulin"],dn:["Glucagon","Ghrelin"],f:["Glucose-dependent insulin release","Slows stomach emptying","Appetite suppression in the brainstem and hypothalamus","SELECT trial: 20% fewer major cardiovascular events"],hl:"about 7 days",h:168,rt:"SC weekly (Ozempic, Wegovy) or oral daily (Rybelsus)",st:"fda",ev:"A",tr:"STEP-1: -14.9% body weight at 68 weeks (2.4 mg) vs -2.4% on placebo",wl:14.9,m:[-3,-3,-3,-1,0,0,-1,0],se:GI,say:"Same skeleton as GLP-1 with two tricks: an Aib at position 2 so DPP-4 can't bite, and a fatty-acid tail that grabs albumin in your blood like a life raft. Two minutes becomes seven days."},
+{id:"tirz",n:"Tirzepatide",s:"Tz",c:"inc",q:"YXEGTFTSDYSIXLDKIAQKAFVQWLIAGGPSSGAPPPS",mods:"Aib at 2 and 13, C20 fatty diacid on Lys20, C-terminal amide",r:"GIP receptor + GLP-1R (dual agonist, GIP-leaning)",up:["Insulin"],dn:["Glucagon","Ghrelin"],f:["Dual incretin action (GIP + GLP-1)","Improves insulin sensitivity","Cuts liver fat"],hl:"about 5 days",h:120,rt:"SC weekly (Mounjaro, Zepbound)",st:"fda",ev:"A",tr:"SURMOUNT-1: -20.9% at 72 weeks (15 mg) vs -3.1% on placebo",wl:20.9,m:[-3,-3,-3,-1,0,0,-1,0],se:GI,say:"Built on the GIP backbone, it's one key that fits two locks. Adding the GIP lock seems to make the nausea more tolerable and the weight loss deeper."},
+{id:"reta",n:"Retatrutide",s:"Rt",c:"inc",q:"YXQGTFTSDYSIXLDKKAQXAFIEYLLEGGPSSGAPPPS",mods:"Representative sequence: Aib and alpha-methyl residues plus a lipidated Lys; exact modifications simplified",r:"GLP-1R + GIPR + glucagon receptor (triple agonist)",up:["Insulin"],dn:["Ghrelin"],f:["Triple agonist: GLP-1, GIP and glucagon receptors","Raises energy expenditure through the glucagon arm","Strong liver-fat reduction"],hl:"about 6 days",h:144,rt:"SC weekly",st:"inv",ev:"A",tr:"TRIUMPH-1: -28.3% at 80 weeks (12 mg) vs -2.2% on placebo. TRIUMPH-2 (diabetes) -20.8%. Lilly plans to file with FDA in Q1 2027.",wl:28.3,m:[-3,-2,-3,-1,0,0,-1,0],se:["Nausea, diarrhea, vomiting","Heart-rate increase","Not yet approved"],say:"It deliberately switches on the glucagon receptor, the hormone that normally raises blood sugar, because glucagon also burns fat in the liver. The insulin push from the other two arms keeps glucose in check."},
+{id:"lira",n:"Liraglutide",s:"Lg",c:"inc",q:"HAEGTFTSDVSSYLEGQAAKEFIAWLVRGRG",mods:"Palmitic acid (C16) on Lys26 via a glutamate spacer, Lys34 to Arg",r:"GLP-1 receptor (GLP-1R)",up:["Insulin"],dn:["Glucagon","Ghrelin"],f:["Glucose-dependent insulin release","Appetite suppression","LEADER trial: fewer cardiovascular deaths"],hl:"about 13 h",h:13,rt:"SC daily (Victoza, Saxenda)",st:"fda",ev:"A",tr:"SCALE: -8.0% at 56 weeks (3.0 mg) vs -2.6% on placebo",wl:8.0,m:[-2,-2,-2,-1,0,0,0,0],se:GI,say:"Semaglutide's older sibling. Same albumin trick with a shorter fatty acid, so it's a daily shot instead of a weekly one."},
+{id:"exen",n:"Exenatide",s:"Ex",c:"inc",q:"HGEGTFTSDLSKQMEEEAVRLFIEWLKNGGPSSGAPPPS",mods:"None: the natural sequence of exendin-4 from Gila monster venom",r:"GLP-1 receptor (GLP-1R)",up:["Insulin"],dn:["Glucagon"],f:["Glucose-dependent insulin release","Slows stomach emptying"],hl:"about 2.4 h",h:2.4,rt:"SC twice daily (Byetta) or weekly microspheres (Bydureon)",st:"fda",ev:"A",tr:"Type 2 diabetes trials: HbA1c down about 0.8 to 1.0%, modest weight loss",m:[-1,-2,-1,0,0,0,0,0],se:["Nausea","Pancreatitis (rare)"],say:"Discovered in Gila monster saliva. Glycine at position 2 makes it naturally resistant to DPP-4. That PSSGAPPPS tail was later borrowed by tirzepatide and retatrutide."},
+{id:"cagri",n:"Cagrilintide",s:"Cg",c:"inc",q:"KCNTATCATQRLAEFLRHSSNNFGPILPPTNVGSNTP",mods:"Long-acting acylated amylin analog; sequence representative",r:"Amylin receptors (AMY1-3) + calcitonin receptor",up:[],dn:["Glucagon","Ghrelin"],f:["Fullness signal via the brainstem (area postrema)","Slows stomach emptying","Partner to semaglutide in CagriSema"],hl:"about 7 to 8 days",h:180,rt:"SC weekly",st:"inv",ev:"A",tr:"REDEFINE-1: alone -11.8%; with semaglutide (CagriSema) -22.7% at 68 weeks. FDA decision on CagriSema expected late 2026.",wl:11.8,m:[-3,-1,-2,-1,0,0,0,0],se:["Nausea, vomiting, constipation"],say:"Amylin is insulin's quiet co-worker, released from the same beta cells. Cagrilintide makes it last a week, and stacking it on semaglutide hits two separate fullness circuits."},
+{id:"pram",n:"Pramlintide",s:"Pr",c:"inc",q:"KCNTATCATQRLANFLVHSSNNFGPILPPTNVGSNTY",mods:"Human amylin with Pro at 25, 28 and 29 (borrowed from rat amylin) so it stops clumping into fibrils",r:"Amylin receptors",up:[],dn:["Glucagon"],f:["Mealtime glucose control","Slows stomach emptying","Cuts the post-meal glucagon spike"],hl:"about 48 min",h:.8,rt:"SC with meals (Symlin)",st:"fda",ev:"A",tr:"Adds about 0.3 to 0.6% HbA1c reduction on top of insulin, with 1 to 2 kg weight loss",m:[-2,-2,-1,0,0,0,0,0],se:["Nausea","Severe low blood sugar when combined with insulin (boxed warning)"],say:"Human amylin sticks to itself and forms amyloid plaques. Three prolines act like doorstops that stop the chains from stacking. Cagrilintide uses the same trick."},
+{id:"ins",n:"Insulin (human)",s:"In",c:"inc",q:"FVNQHLCGSHLVEALYLVCGERGFFYTPKT|GIVEQCCTSICSLYQLENYCN",ss:[[36,6],[49,18],[35,40]],mods:"Two chains (B 30 + A 21) held by three disulfide bridges",r:"Insulin receptor (tyrosine kinase)",up:[],dn:["Glucagon"],f:["Moves glucose into muscle and fat (GLUT4)","Shuts down fat breakdown and liver glucose output","Drives protein synthesis"],hl:"about 5 min in blood; regular SC insulin acts 4 to 8 h",h:.08,rt:"SC, IV",st:"fda",ev:"A",tr:"The first peptide drug: Toronto, 1922",m:[1,-3,2,1,0,0,0,0],se:["Low blood sugar","Weight gain"],say:"Fifty-one amino acids, two chains, three disulfide bridges. Insulin is the reason this field exists. You can see the two chains side by side on the board."},
+{id:"gcg",n:"Glucagon",s:"Gc",c:"inc",q:"HSQGTFTSDYSKYLDSRRAQDFVQWLMNT",r:"Glucagon receptor",up:["GH","Cortisol"],dn:[],f:["Raises blood glucose (glycogen breakdown, gluconeogenesis)","Burns fat in the liver","Rescue drug for severe low blood sugar"],hl:"8 to 18 min",h:.22,rt:"IM, SC or nasal rescue",st:"fda",ev:"A",m:[-1,3,-1,0,1,0,0,0],se:["Nausea","Transient high blood sugar"],say:"Insulin's opposite number. Its first residues, HSQGTFTSD, rhyme with GLP-1's HAEGTFTSD because both come from one gene: proglucagon."},
+/* somatostatin */
+{id:"sst",n:"Somatostatin-14",s:"Ss",c:"sst",q:"AGCKNFFWKTFTSC",cyc:1,r:"SSTR1 to SSTR5",up:[],dn:["GH","Insulin","Glucagon","TSH","Gastrin"],f:["The body's universal endocrine off switch","Slows gut motility and secretion"],hl:"1 to 3 min",h:.03,rt:"Made in hypothalamus, pancreatic delta cells and gut",st:"endo",ev:"A",m:[0,0,0,0,-3,0,0,0],se:[],say:"If hormones were a party, somatostatin would be the neighbor calling the police. The key motif is four residues: Phe-Trp-Lys-Thr. Every drug in this family keeps them."},
+{id:"oct",n:"Octreotide",s:"Oc",c:"sst",q:"FCFWKTCT",cyc:1,mods:"D-Phe1, D-Trp4, C-terminal threoninol",r:"SSTR2 > SSTR5",up:[],dn:["GH","IGF-1","Insulin","Glucagon","TSH","Gastrin"],f:["Acromegaly","Carcinoid and VIPoma symptom control","Variceal bleeding"],hl:"about 1.7 h",h:1.7,rt:"SC, IV, monthly LAR depot",st:"fda",ev:"A",tr:"Acromegaly: normalizes IGF-1 in roughly half to two-thirds of patients",m:[0,1,0,0,-3,0,0,0],se:["Gallstones","GI upset","High or low blood sugar"],say:"Chemists shrank a 14-residue hormone to 8 and flipped two residues into their mirror-image D-form so enzymes can't recognize them. Half-life jumped from 2 minutes to nearly 2 hours."},
+{id:"lan",n:"Lanreotide",s:"La",c:"sst",q:"XCYWKVCT",cyc:1,mods:"D-2-naphthylalanine1, D-Trp4, C-terminal amide",r:"SSTR2 / SSTR5",up:[],dn:["GH","IGF-1","Insulin","Glucagon","TSH"],f:["Acromegaly","Neuroendocrine tumors"],hl:"about 23 to 30 days (depot)",h:600,rt:"Deep SC monthly gel (Somatuline)",st:"fda",ev:"A",tr:"CLARINET: longer progression-free survival in gut and pancreatic neuroendocrine tumors",m:[0,1,0,0,-3,0,0,0],se:["Gallstones","Diarrhea"],say:"This one self-assembles into nanotubes under the skin. The drug is literally its own depot."},
+{id:"pas",n:"Pasireotide",s:"Ps",c:"sst",q:"XXWKYF",cyc:1,mods:"Cyclic hexapeptide with modified hydroxyproline and phenylglycine; representative",r:"SSTR5 > SSTR1, 2, 3 (broad)",up:[],dn:["ACTH","Cortisol","GH","IGF-1","Insulin"],f:["Cushing's disease","Acromegaly"],hl:"about 12 h",h:12,rt:"SC twice daily or monthly LAR (Signifor)",st:"fda",ev:"A",tr:"Cushing's disease: urinary cortisol normalized in about a quarter of patients at 6 months on the high dose",m:[0,2,0,0,-3,0,0,0],se:["High blood sugar (very common)","Gallstones"],say:"Because it hits SSTR5 hard, it also shuts down insulin and raises blood sugar in most patients. A lesson in receptor selectivity."},
+/* GnRH axis */
+{id:"gnrh",n:"Gonadorelin (GnRH)",s:"Gn",c:"gnrh",q:"EHWSYGLRPG",mods:"pyroGlu1, C-terminal amide",r:"GnRH receptor",up:["LH","FSH","Testosterone","Estrogen"],dn:[],f:["Master switch of reproduction","Pulsatile pump treats some infertility"],hl:"2 to 10 min",h:.1,rt:"Released in pulses from the hypothalamus",st:"endo",ev:"A",m:[0,0,0,0,0,0,0,0],se:[],say:"The magic is in the rhythm. Pulses every 60 to 120 minutes turn LH and FSH up, but a constant drip shuts them down. Every drug in this column exploits that."},
+{id:"leu",n:"Leuprolide",s:"Lp",c:"gnrh",q:"EHWSYLLRP",mods:"D-Leu6, C-terminal ethylamide",r:"GnRH receptor superagonist",up:[],dn:["LH","FSH","Testosterone","Estrogen"],flare:1,f:["Medical castration in prostate cancer","Endometriosis and fibroids","Central precocious puberty"],hl:"about 3 h; depots last 1 to 6 months",h:3,rt:"SC or IM depot (Lupron, Eligard)",st:"fda",ev:"A",tr:"Testosterone falls to castrate levels within about 4 weeks after an initial flare",m:[0,0,1,-2,0,0,0,-2],se:["Hot flashes","Bone loss","Initial testosterone flare","Metabolic syndrome risk"],say:"A paradox drug: an agonist that ends up as a blocker. Constant stimulation exhausts the receptor and testosterone collapses."},
+{id:"trip",n:"Triptorelin",s:"Tp",c:"gnrh",q:"EHWSYWLRPG",mods:"D-Trp6, C-terminal amide",r:"GnRH receptor superagonist",up:[],dn:["LH","FSH","Testosterone","Estrogen"],flare:1,f:["Prostate cancer","Central precocious puberty"],hl:"about 3 h",h:2.8,rt:"IM depot (Trelstar, Triptodur)",st:"fda",ev:"A",m:[0,0,1,-2,0,0,0,-2],se:["Hot flashes","Bone loss","Initial flare"],say:"Same playbook as leuprolide with a D-tryptophan at position 6. That bulky mirror-image residue locks the peptide into the shape the receptor likes best."},
+{id:"gos",n:"Goserelin",s:"Go",c:"gnrh",q:"EHWSYSLRPG",mods:"D-Ser(tBu)6, aza-glycine10",r:"GnRH receptor superagonist",up:[],dn:["LH","FSH","Testosterone","Estrogen"],flare:1,f:["Prostate and breast cancer","Endometriosis"],hl:"about 4 h",h:4.2,rt:"SC implant every 1 or 3 months (Zoladex)",st:"fda",ev:"A",m:[0,0,1,-2,0,0,0,-2],se:["Hot flashes","Bone loss"],say:"Delivered as a tiny biodegradable rod injected under the skin of the belly."},
+{id:"deg",n:"Degarelix",s:"Dg",c:"gnrh",q:"XXXSXXLKPA",mods:"Six of ten residues are unnatural (D-Nal, D-Cpa, D-Pal, modified Phe, isopropyl-Lys)",r:"GnRH receptor antagonist",up:[],dn:["LH","FSH","Testosterone"],f:["Advanced prostate cancer"],hl:"about 53 days (depot)",h:1272,rt:"SC monthly (Firmagon)",st:"fda",ev:"A",tr:"Testosterone to castrate levels in about 3 days, with no flare",m:[0,0,1,-2,0,0,0,-2],se:["Injection-site reactions","Hot flashes"],say:"Instead of exhausting the receptor, this one simply sits in the lock. No flare, castrate testosterone within days."},
+{id:"cet",n:"Cetrorelix",s:"Ce",c:"gnrh",q:"XXXSYXLRPA",mods:"Ac-D-Nal1, D-Cpa2, D-Pal3, D-Cit6, D-Ala10",r:"GnRH receptor antagonist",up:[],dn:["LH","FSH"],f:["Stops a premature LH surge during IVF"],hl:"about 30 h",h:30,rt:"SC (Cetrotide)",st:"fda",ev:"A",m:[0,0,0,0,0,0,0,0],se:["Injection-site reactions","Headache"],say:"IVF clinics use it to stop the body from ovulating on its own before the eggs are retrieved."},
+{id:"kiss",n:"Kisspeptin-10",s:"Ki",c:"gnrh",q:"YNWNSFGLRF",mods:"C-terminal amide",r:"KISS1R (GPR54)",up:["LH","FSH","Testosterone"],dn:[],f:["Triggers GnRH release","Studied as a gentler IVF trigger"],hl:"about 4 min (kisspeptin-54 about 28 min)",h:.07,rt:"IV or SC in trials",st:"inv",ev:"B",m:[0,0,0,0,0,0,0,0],se:[],say:"Sits one level above GnRH. It was named after Hershey's Kisses because it was discovered in Hershey, Pennsylvania."},
+/* GH secretagogues */
+{id:"serm",n:"Sermorelin",s:"Se",c:"gh",q:"YADAIFTNSYRKVLGQLSARKLLQDIMSR",mods:"GHRH(1-29) amide",r:"GHRH receptor",up:["GH","IGF-1"],dn:[],f:["Raises GH in natural pulses","Respects somatostatin feedback"],hl:"10 to 20 min",h:.2,rt:"SC at night",st:"disc",ev:"B",tr:"Approved as Geref for GH deficiency in children, discontinued in 2008; now compounded",m:[0,0,-1,1,2,1,0,0],se:["Injection-site reactions","Flushing"],say:"The first 29 residues of GHRH carry all the activity. It still respects the body's brakes: somatostatin can shut it off."},
+{id:"tesa",n:"Tesamorelin",s:"Ts",c:"gh",q:"YADAIFTNSYRKVLGQLSARKLLQDIMSRQQGESNQERGARARL",mods:"trans-3-hexenoyl cap on Tyr1",r:"GHRH receptor",up:["GH","IGF-1"],dn:[],f:["Shrinks visceral (belly) fat","Reduces liver fat in HIV"],hl:"26 to 38 min",h:.5,rt:"SC daily (Egrifta)",st:"fda",ev:"A",tr:"HIV lipodystrophy: visceral fat down about 15 to 18% at 26 weeks",m:[0,1,-2,1,2,0,0,0],se:["Joint pain","Fluid retention","Blood sugar rise"],say:"Full-length GHRH with a small fatty cap on its nose to slow breakdown. The only GHRH analog FDA approved today, specifically for visceral fat."},
+{id:"cjc",n:"CJC-1295",s:"Cj",c:"gh",q:"YADAIFTQSYRKVLAQLSARKLLQDILSR",mods:"D-Ala2, Gln8, Ala15, Leu27 substitutions; the DAC version adds a linker that binds albumin",r:"GHRH receptor",up:["GH","IGF-1"],dn:[],f:["Sustained GH and IGF-1 elevation"],hl:"about 30 min without DAC; 6 to 8 days with DAC",h:168,rt:"SC (research)",st:"res",ev:"B",tr:"Healthy adults (2006): one DAC dose raised GH 2 to 10 times and IGF-1 1.5 to 3 times for 6+ days",m:[0,1,-1,1,3,1,0,0],se:["Flushing","Water retention","Unregulated product quality"],say:"Its four substitutions patch the exact spots where enzymes cut GHRH. Not FDA approved, and the quality of grey-market vials is a real chemistry problem."},
+{id:"ipa",n:"Ipamorelin",s:"Ip",c:"gh",q:"XHXFK",mods:"Aib1, D-2-Nal3, D-Phe4, C-terminal amide",r:"Ghrelin receptor (GHS-R1a), selective",up:["GH","IGF-1"],dn:[],f:["GH release without cortisol or prolactin spikes"],hl:"about 2 h",h:2,rt:"SC (research)",st:"res",ev:"B",tr:"Phase 2 trial for post-surgical bowel recovery missed its goal",m:[1,0,-1,1,2,0,0,0],se:["Headache","Water retention"],say:"Five residues, three of them unnatural. Its claim to fame is selectivity: GH goes up without the cortisol and prolactin bumps older GHRPs cause."},
+{id:"ghrp6",n:"GHRP-6",s:"G6",c:"gh",q:"HWAWFK",mods:"D-Trp2, D-Phe5, C-terminal amide",r:"Ghrelin receptor (GHS-R1a)",up:["GH","Cortisol","Prolactin"],dn:[],f:["Strong GH pulse","Intense hunger (ghrelin mimic)"],hl:"about 20 min",h:.33,rt:"SC (research)",st:"res",ev:"B",m:[3,1,0,1,2,0,0,0],se:["Big appetite increase","Cortisol and prolactin rise"],say:"A ghrelin mimic, so it makes you very hungry. Historically important: it revealed the ghrelin receptor before ghrelin itself was discovered."},
+{id:"hex",n:"Hexarelin",s:"Hx",c:"gh",q:"HWAWFK",mods:"2-methyl-D-Trp2, D-Phe5, C-terminal amide",r:"Ghrelin receptor + CD36 (heart)",up:["GH","Cortisol","Prolactin"],dn:[],f:["Most potent GHRP","Cardioprotective in animal studies (CD36)"],hl:"about 70 min",h:1.2,rt:"SC (research)",st:"res",ev:"B",m:[1,0,0,1,3,0,0,0],se:["Response fades with repeated use"],say:"The strongest GH releaser of the family, but the body stops listening after repeated doses. Pharmacologists call that tachyphylaxis."},
+{id:"ghrelin",n:"Ghrelin",s:"Gr",c:"gh",q:"GSSFLSPEHQRVQQRKESKKPPAKLQPR",mods:"n-octanoyl fatty acid on Ser3, required for activity",r:"Ghrelin receptor (GHS-R1a)",up:["GH","ACTH","Cortisol","Prolactin"],dn:["Insulin"],f:["The hunger hormone","Pre-meal surge from the stomach","GH release"],hl:"about 10 to 30 min",h:.3,rt:"Made in the stomach",st:"endo",ev:"A",m:[3,1,1,0,2,0,0,0],se:[],say:"The only known hormone that needs a fatty acid attached to work. GLP-1 drugs push it down; the GHRPs imitate it."},
+{id:"aod",n:"AOD-9604",s:"Ao",c:"gh",q:"YLRIVQCRSVEGSCGF",mods:"hGH(176-191) with an extra Tyr at the N-terminus",r:"Not the GH receptor; a beta-3 adrenergic pathway was proposed",up:[],dn:[],f:["Claimed fat breakdown","Does not raise IGF-1"],hl:"short; poorly characterized in humans",h:.5,rt:"SC or oral (research)",st:"res",ev:"B",tr:"Phase 2b obesity trial: no meaningful weight loss vs placebo; development stopped",m:[0,0,0,0,0,0,0,0],se:["Unregulated product quality"],say:"A fragment from the tail of growth hormone. Wonderful in obese mice, flat in the human trial. Professor's rule: mice are not people."},
+/* melanocortins */
+{id:"setmel",n:"Setmelanotide",s:"Sl",c:"mc",q:"RCAHFRWC",cyc:1,mods:"Ac-Arg, D-Phe, ring closed by a Cys-Cys bridge",r:"MC4R agonist",up:["MC4R signal"],dn:[],f:["Rare genetic obesity: POMC, PCSK1, LEPR deficiency","Bardet-Biedl syndrome"],hl:"about 11 h",h:11,rt:"SC daily (Imcivree)",st:"fda",ev:"A",tr:"POMC deficiency: about -25.6% weight at roughly 1 year (small genetic cohort)",wl:25.6,m:[-3,0,-3,0,0,0,0,0],se:["Skin darkening","Nausea","Spontaneous erections"],say:"Precision obesity medicine. When the leptin to POMC to MC4R chain is broken upstream, this peptide hot-wires the final step."},
+{id:"brem",n:"Bremelanotide",s:"Bm",c:"mc",q:"XDHFRWK",cyc:1,mods:"Ac-Nle1, D-Phe4, lactam ring Asp2 to Lys7, free acid",r:"MC4R (and MC1R)",up:["MC4R signal"],dn:[],f:["Low sexual desire (HSDD) in premenopausal women"],hl:"about 2.7 h",h:2.7,rt:"SC autoinjector as needed (Vyleesi)",st:"fda",ev:"A",tr:"RECONNECT trials: modest gains in desire scores",m:[-1,0,0,0,0,0,0,0],se:["Nausea (about 40%)","Brief blood pressure rise","Skin darkening with repeat use"],say:"A cousin of melanotan II. It acts in the brain, not on blood flow, which makes it very different from the erectile drugs."},
+{id:"mt2",n:"Melanotan II",s:"M2",c:"mc",q:"XDHFRWK",cyc:1,mods:"Ac-Nle1, D-Phe4, lactam ring, C-terminal amide",r:"MC1R, MC3R, MC4R (non-selective)",up:["MC4R signal"],dn:[],f:["Tanning","Appetite suppression","Libido"],hl:"about 1 h",h:1,rt:"SC (unapproved)",st:"res",ev:"C",m:[-2,0,-1,0,0,0,0,0],se:["New or rapidly changing moles reported","Nausea, flushing","Priapism","Unregulated products"],say:"Non-selective, unapproved, and sold online as a tanning shot. Dermatologists have case reports of fast-changing moles. A firm pass from this professor."},
+/* posterior pituitary */
+{id:"oxt",n:"Oxytocin",s:"Ox",c:"pit",q:"CYIQNCPLG",cyc:1,mods:"Cys1 to Cys6 disulfide ring, C-terminal amide",r:"Oxytocin receptor",up:["Prolactin"],dn:["ACTH","Cortisol"],f:["Uterine contractions in labor","Milk let-down","Social bonding","Dampens the stress response"],hl:"1 to 6 min",h:.06,rt:"IV (Pitocin); nasal in research",st:"fda",ev:"A",m:[-1,0,0,0,0,0,-1,0],se:["Uterine overstimulation","Water retention at high doses"],say:"Nine residues with a ring closed by a disulfide bridge. Vasopressin, next door, differs at only two positions and does completely different jobs."},
+{id:"avp",n:"Vasopressin",s:"Av",c:"pit",q:"CYFQNCPRG",cyc:1,mods:"Cys1 to Cys6 disulfide ring, C-terminal amide",r:"V1a, V1b, V2 receptors",up:["ACTH","Cortisol"],dn:[],f:["Water reabsorption in the kidney (V2)","Blood vessel constriction (V1a)","ACTH release (V1b)"],hl:"10 to 20 min",h:.25,rt:"IV (Vasostrict)",st:"fda",ev:"A",m:[0,0,0,0,0,0,0,0],se:["Low sodium","Reduced blood flow to fingers and gut"],say:"Swap two residues from oxytocin (Ile3 to Phe, Leu8 to Arg) and the molecule goes from labor and love to blood pressure and water balance."},
+{id:"ddavp",n:"Desmopressin",s:"Dd",c:"pit",q:"XYFQNCPRG",cyc:1,mods:"Deamino-Cys1, D-Arg8",r:"V2 receptor (selective)",up:[],dn:[],f:["Concentrates urine (diabetes insipidus, bedwetting)","Releases von Willebrand factor and factor VIII"],hl:"1.5 to 3 h",h:2.8,rt:"Nasal, oral, IV (DDAVP)",st:"fda",ev:"A",m:[0,0,0,0,0,0,0,0],se:["Low sodium (hyponatremia)"],say:"Delete the amine on residue 1 and mirror-flip residue 8: the blood pressure effect vanishes and the kidney effect stays. Textbook medicinal chemistry."},
+/* bone */
+{id:"calc",n:"Calcitonin (salmon)",s:"Ct",c:"bone",q:"CSNLSTCVLGKLSQELHKLQTYPRTNTGSGTP",mods:"Cys1 to Cys7 disulfide, C-terminal amide",r:"Calcitonin receptor",up:[],dn:["Calcium (blood)"],f:["Blocks osteoclast bone breakdown","Lowers blood calcium","Pain relief in vertebral fractures"],hl:"about 1 h",h:1,rt:"SC, IM, nasal (Miacalcin)",st:"fda",ev:"A",m:[0,0,0,0,0,0,0,1],se:["Nausea, flushing","Small cancer signal limited long-term use"],say:"Salmon calcitonin is far more potent in humans than our own. Yes, a fish hormone approved for people."},
+{id:"teri",n:"Teriparatide",s:"Tr",c:"bone",q:"SVSEIQLMHNLGKHLNSMERVEWLRKKLQDVHNF",mods:"PTH(1-34), unmodified",r:"PTH1 receptor",up:["Calcium (blood)"],dn:[],f:["Builds new bone when pulsed daily","Raises calcium absorption"],hl:"about 1 h",h:1,rt:"SC daily (Forteo)",st:"fda",ev:"A",tr:"Fracture Prevention Trial: 65% fewer new spine fractures, spine BMD up about 9.7%",m:[0,0,0,0,0,1,0,3],se:["Leg cramps","Dizziness","Brief high calcium"],say:"A beautiful paradox: constant PTH dissolves bone, but a short daily pulse builds it. Timing is pharmacology."},
+{id:"abalo",n:"Abaloparatide",s:"Ab",c:"bone",q:"AVSEHQLLHDKGKSIQDLRRRELLEKLLXKLHTA",mods:"PTHrP(1-34) analog with Aib29, C-terminal amide",r:"PTH1 receptor (prefers the short-signal conformation)",up:["Calcium (blood)"],dn:[],f:["Builds bone in postmenopausal osteoporosis"],hl:"about 1.7 h",h:1.7,rt:"SC daily (Tymlos)",st:"fda",ev:"A",tr:"ACTIVE: 86% fewer new spine fractures vs placebo",m:[0,0,0,0,0,1,0,3],se:["Dizziness","Fast heartbeat"],say:"Modeled on PTHrP rather than PTH. It favors a receptor shape that gives a brief signal, which may mean more bone building with less calcium spike."},
+/* repair & immune */
+{id:"bpc",n:"BPC-157",s:"Bp",c:"rep",q:"GEPPPGKPADDAGLV",mods:"None; fragment of a gastric juice protein",r:"No single receptor; effects reported on VEGFR2, nitric oxide, FAK-paxillin and GH receptor expression in tendon cells",up:["VEGF / angiogenesis"],dn:["Inflammatory cytokines"],f:["Tendon, ligament and gut healing in animal models","New blood vessel growth","Gut lining protection"],hl:"short; human data largely unpublished",h:.4,rt:"Oral or SC (research)",st:"limbo",ev:"C",tr:"Mostly rodent data. FDA removed it from Category 2 in April 2026; an advisory panel voted 8 to 6 in July 2026 to recommend Category 1 for ulcerative colitis. Rulemaking pending.",m:[0,0,0,0,0,3,-2,0],se:["Long-term human safety unknown","Theoretical tumor concern from angiogenesis","Contaminated or mislabeled vials"],say:"Fifteen residues, enormous hype, impressive rat studies and almost no published human trials. As of late 2026 it sits in regulatory limbo."},
+{id:"tb5",n:"TB-500",s:"Tb",c:"rep",q:"LKKTETQ",mods:"Ac-LKKTETQ, the actin-binding motif (17-23) of thymosin beta-4",r:"Binds G-actin",up:["VEGF / angiogenesis"],dn:["Inflammatory cytokines"],f:["Cell migration","Wound healing in animals","Angiogenesis"],hl:"short; poorly characterized",h:1,rt:"SC (research)",st:"res",ev:"C",tr:"Prohibited in sport by WADA",m:[0,0,0,0,0,3,-1,0],se:["Unknown long-term safety","Unregulated product quality"],say:"Thymosin beta-4 is a 43-residue protein that grabs actin, the cell's scaffolding. TB-500 is just its seven-residue grip."},
+{id:"ta1",n:"Thymosin alpha-1",s:"Ta",c:"rep",q:"SDAAVDTSSEITTKDLKEKKEVVEEAEN",mods:"N-acetyl Ser1",r:"TLR2 / TLR9 on immune cells",up:["IL-2 / IFN-gamma"],dn:[],f:["T-cell maturation","Antiviral immune support","Vaccine adjuvant"],hl:"about 2 h",h:2,rt:"SC (Zadaxin)",st:"intl",ev:"B",tr:"Approved in 35+ countries for hepatitis B and C; not FDA approved",m:[0,0,0,0,0,1,0,0],se:["Injection-site discomfort"],say:"A thymus hormone that trains T-cells. Look how acidic it is: count the orange D and E residues on the model."},
+{id:"ghk",n:"GHK-Cu",s:"Gk",c:"rep",q:"GHK",mods:"Gly-His-Lys chelating a Cu2+ ion",r:"Copper delivery; modulates many genes",up:[],dn:["Inflammatory cytokines"],f:["Collagen and elastin synthesis","Wound healing","Skin remodeling"],hl:"minutes in blood",h:.2,rt:"Topical cosmetics; SC in research",st:"res",ev:"B",m:[0,0,0,0,0,2,-1,0],se:["Skin irritation"],say:"Three residues and a copper ion. Glycine, histidine and lysine wrap around the copper like fingers around a coin."},
+{id:"kpv",n:"KPV",s:"Kp",c:"rep",q:"KPV",mods:"alpha-MSH(11-13)",r:"Enters cells through PepT1; blocks NF-kB",up:[],dn:["Inflammatory cytokines"],f:["Anti-inflammatory in colitis models"],hl:"short",h:.2,rt:"Oral or SC (research)",st:"res",ev:"C",m:[0,0,0,0,0,1,-2,0],se:["Unknown in humans"],say:"The last three residues of alpha-MSH carry its anti-inflammatory punch without the tanning. Mostly mouse colitis data."},
+{id:"ll37",n:"LL-37",s:"LL",c:"rep",q:"LLGDFFRKSKEKIGKEFKRIVQRIKDFLRNLVPRTES",mods:"None; human cathelicidin",r:"Inserts into membranes; FPR2, P2X7",up:["IL-2 / IFN-gamma"],dn:[],f:["Kills bacteria by punching holes in membranes","Wound healing","Immune signaling"],hl:"short",h:.3,rt:"Made by skin, gut and immune cells",st:"endo",ev:"B",m:[0,0,0,0,0,2,0,0],se:["Linked to rosacea and psoriasis when overactive"],say:"Our built-in antibiotic. One face of the helix is greasy and the other is positively charged, so it slides into bacterial membranes. Spin it and look for the pink stripe."},
+/* neuro & longevity */
+{id:"semax",n:"Semax",s:"Sx",c:"neuro",q:"MEHFPGP",mods:"ACTH(4-7) + Pro-Gly-Pro tail",r:"Melanocortin receptors; raises BDNF",up:["BDNF"],dn:[],f:["Stroke recovery and cognition (Russia)"],hl:"minutes in blood; effects last hours",h:.1,rt:"Nasal",st:"intl",ev:"B",m:[0,0,0,0,0,1,0,0],se:["Little Western safety data"],say:"A fragment of ACTH with a Pro-Gly-Pro tail glued on for stability. Approved in Russia; Western trials are thin."},
+{id:"selank",n:"Selank",s:"Sk",c:"neuro",q:"TKPRPGP",mods:"Tuftsin (TKPR) + Pro-Gly-Pro tail",r:"GABA-A modulation; slows enkephalin breakdown",up:["BDNF"],dn:[],f:["Anxiety (Russia)"],hl:"minutes",h:.05,rt:"Nasal",st:"intl",ev:"B",m:[0,0,0,0,0,0,0,0],se:["Little Western safety data"],say:"Tuftsin, an immune peptide, plus the same PGP tail as Semax. Approved in Russia for anxiety."},
+{id:"epi",n:"Epitalon",s:"Ep",c:"neuro",q:"AEDG",mods:"None",r:"Proposed telomerase activation; pineal gland",up:["Melatonin"],dn:[],f:["Claimed telomere lengthening","Melatonin rhythm in older adults (small studies)"],hl:"unknown",h:.15,rt:"SC (research)",st:"res",ev:"C",m:[0,0,0,0,0,0,0,0],se:["Unknown long-term safety"],say:"Four residues, very large claims. Most of the data come from a single research group. Raise an eyebrow at any longevity promise."},
+{id:"dsip",n:"DSIP",s:"Ds",c:"neuro",q:"WAGGDASGE",mods:"None",r:"Unknown",up:[],dn:[],f:["Claimed sleep promotion"],hl:"about 15 min",h:.25,rt:"IV or SC (research)",st:"res",ev:"C",m:[0,0,0,0,0,0,0,0],se:["Inconsistent effects"],say:"Delta sleep-inducing peptide, found in 1977 in the blood of sleeping rabbits. Nearly fifty years later, nobody has found its receptor."},
+{id:"motsc",n:"MOTS-c",s:"Mo",c:"neuro",q:"MRWQEMGYIFYPRKLR",mods:"None; encoded in mitochondrial DNA",r:"Activates AMPK; moves into the nucleus under stress",up:[],dn:[],f:["Insulin sensitivity in mice","Exercise mimetic","Rises with exercise in humans"],hl:"short",h:.5,rt:"SC (research)",st:"res",ev:"C",m:[0,-1,-1,1,0,0,0,0],se:["Unknown in humans"],say:"Encoded not in the nucleus but inside the mitochondria's own DNA. Exercise raises it in people; the injected benefits are still mouse data."}
+];
+P.forEach((p,i)=>{p.i=i+1;p.len=p.q.replace("|","").length});
+
+const HORM={
+ "Insulin":"Pancreatic beta-cell hormone that moves glucose into cells and stores energy.",
+ "Glucagon":"Pancreatic alpha-cell hormone that raises blood glucose and burns liver fat.",
+ "Ghrelin":"Stomach hormone that drives hunger and GH release.",
+ "GH":"Growth hormone from the anterior pituitary; builds tissue and mobilizes fat.",
+ "IGF-1":"Liver hormone made in response to GH; most of GH's growth effects run through it.",
+ "LH":"Luteinizing hormone; triggers testosterone in testes and ovulation in ovaries.",
+ "FSH":"Follicle-stimulating hormone; drives sperm and egg development.",
+ "Testosterone":"Main androgen; muscle, bone, libido, red blood cells.",
+ "Estrogen":"Main female sex steroid; also guards bone in every sex.",
+ "ACTH":"Pituitary hormone that tells the adrenal glands to make cortisol.",
+ "Cortisol":"Adrenal stress hormone; raises glucose and calms inflammation.",
+ "Prolactin":"Pituitary hormone for milk production.",
+ "TSH":"Thyroid-stimulating hormone; sets the metabolic thermostat.",
+ "Gastrin":"Stomach hormone that triggers acid secretion.",
+ "Calcium (blood)":"Not a hormone, but the number PTH and calcitonin fight over.",
+ "MC4R signal":"The brain's final satiety switch in the leptin to POMC pathway.",
+ "Inflammatory cytokines":"Signals like TNF-alpha and IL-6 that drive inflammation.",
+ "VEGF / angiogenesis":"Growth factor signaling that builds new blood vessels.",
+ "IL-2 / IFN-gamma":"Immune cytokines that activate T-cells.",
+ "BDNF":"Brain-derived neurotrophic factor; supports neuron growth and plasticity.",
+ "Melatonin":"Pineal hormone that sets the sleep-wake clock."
+};
+
+/* ---------- motion ---------- */
+let motion=!matchMedia("(prefers-reduced-motion: reduce)").matches;
+try{const s=localStorage.getItem("pl-motion"); if(s!==null) motion=s==="1";}catch(e){}
+const mt=document.getElementById("motionToggle");
+function syncMotion(){mt.setAttribute("aria-pressed",motion);mt.textContent="Chalk dust: "+(motion?"on":"off");}
+syncMotion();
+
+/* ---------- professor ---------- */
+const PROF_SVG=`<svg viewBox="0 0 200 250" aria-hidden="true">
+<path d="M40 250 L52 160 Q100 136 148 160 L160 250 Z" fill="#f1efe6" stroke="#cfcab8" stroke-width="2"/>
+<path d="M88 152 L100 196 L112 152" fill="#8fc8f0"/>
+<path d="M86 156 L100 166 L86 176 Z M114 156 L100 166 L114 176 Z" fill="#f29bb3"/>
+<circle cx="100" cy="166" r="4" fill="#d9738f"/>
+<path d="M150 178 L188 120" stroke="#f1efe6" stroke-width="12" stroke-linecap="round"/>
+<path d="M186 122 L198 92" stroke="#8a5a33" stroke-width="4" stroke-linecap="round"/>
+<circle cx="100" cy="92" r="46" fill="#e7c39d"/>
+<circle cx="56" cy="78" r="16" fill="#e9e7df"/><circle cx="50" cy="96" r="12" fill="#e9e7df"/><circle cx="144" cy="78" r="16" fill="#e9e7df"/><circle cx="150" cy="96" r="12" fill="#e9e7df"/><circle cx="100" cy="48" r="10" fill="#e9e7df"/><circle cx="86" cy="52" r="8" fill="#e9e7df"/><circle cx="114" cy="52" r="8" fill="#e9e7df"/>
+<circle cx="82" cy="90" r="14" fill="rgba(255,255,255,.35)" stroke="#2b2b2b" stroke-width="3.5"/><circle cx="118" cy="90" r="14" fill="rgba(255,255,255,.35)" stroke="#2b2b2b" stroke-width="3.5"/><path d="M96 90 L104 90" stroke="#2b2b2b" stroke-width="3.5"/>
+<circle cx="82" cy="91" r="4" fill="#2b2b2b"/><circle cx="118" cy="91" r="4" fill="#2b2b2b"/>
+<g class="lids"><rect x="70" y="78" width="24" height="24" rx="12" fill="#e7c39d"/><rect x="106" y="78" width="24" height="24" rx="12" fill="#e7c39d"/></g>
+<path d="M78 74 Q84 68 90 73 M110 73 Q116 68 122 74" stroke="#cfcab8" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M84 114 Q100 106 116 114 Q108 118 100 116 Q92 118 84 114 Z" fill="#e9e7df"/>
+<ellipse class="mouth" cx="100" cy="122" rx="7" ry="2.5" fill="#7a2f12"/>
+</svg>`;
+document.querySelectorAll("#prof1,#prof2").forEach(el=>el.innerHTML=PROF_SVG);
+
+function say(bubble,prof,text){
+  const out=bubble.querySelector(".txt");
+  clearInterval(bubble._t);
+  if(!motion){out.innerHTML=text;prof&&prof.classList.remove("talking");return;}
+  const plain=text; let i=0; out.textContent="";
+  prof&&prof.classList.add("talking");
+  bubble._done=()=>{clearInterval(bubble._t);out.innerHTML=plain;prof&&prof.classList.remove("talking");};
+  bubble._t=setInterval(()=>{i+=2;out.textContent=plain.replace(/<[^>]+>/g,"").slice(0,i);if(i>=plain.length)bubble._done();},22);
+}
+document.querySelectorAll(".bubble").forEach(b=>b.addEventListener("click",()=>b._done&&b._done()));
+
+const INTRO="Good morning, class. Today: <b>peptides</b>, chains of 2 to 50 amino acids. Most of them work as hormone switches, either turning a hormone up or shutting one down. Click any element on the periodic table and I'll build the molecule in 3D, one amino acid at a time. Lab safety first: this is chemistry class, not a prescription pad.";
+
+/* ---------- residues ---------- */
+const AA={A:["Ala","hydrophobic"],V:["Val","hydrophobic"],L:["Leu","hydrophobic"],I:["Ile","hydrophobic"],M:["Met","hydrophobic"],F:["Phe","hydrophobic"],W:["Trp","hydrophobic"],Y:["Tyr","hydrophobic"],S:["Ser","polar"],T:["Thr","polar"],N:["Asn","polar"],Q:["Gln","polar"],C:["Cys","sulfur"],K:["Lys","positive"],R:["Arg","positive"],H:["His","positive"],D:["Asp","negative"],E:["Glu","negative"],G:["Gly","special"],P:["Pro","special"],X:["Modified","modified"]};
+const RC={hydrophobic:"#f3d36b",polar:"#8fc8f0",positive:"#f29bb3",negative:"#f2a65a",special:"#f1efe6",sulfur:"#d8e86a",modified:"#c7a0ff"};
+const SIZE={G:0,A:.4,S:.5,C:.55,P:.55,T:.6,V:.65,D:.65,N:.65,I:.75,L:.75,M:.75,E:.7,Q:.7,K:.8,H:.8,F:.85,R:.9,Y:.9,W:1,X:.9};
+
+/* ---------- 3D viewer ---------- */
+function makeViewer(canvas,opts={}){
+  let renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});}catch(e){return null;}
+  if(!renderer.getContext())return null;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(38,1,.1,2000);
+  scene.add(new THREE.HemisphereLight(0xfffbe8,0x1d3a31,.95));
+  const dl=new THREE.DirectionalLight(0xffffff,.75);dl.position.set(6,10,12);scene.add(dl);
+  const pivot=new THREE.Group();scene.add(pivot);
+  const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+  let parts=[],atoms=[],n=1,t0=0,rad=10,zf=1,rx=.3,ry=0,drag=null,running=false,hover=-1,pep=null,visible=true;
+  const sph=new THREE.SphereGeometry(1,20,14),cyl=new THREE.CylinderGeometry(1,1,1,10);
+  const UP=new THREE.Vector3(0,1,0);
+  function mat(c){return new THREE.MeshStandardMaterial({color:c,roughness:.5,metalness:.05,emissive:0x000000});}
+  function ball(pos,r,c,order,res){const m=new THREE.Mesh(sph,mat(c));m.position.copy(pos);m.userData={r,order,res};m.scale.setScalar(.0001);pivot.add(m);parts.push(m);if(res!=null)atoms.push(m);return m;}
+  function stick(a,b,r,c,order){const d=new THREE.Vector3().subVectors(b,a);const m=new THREE.Mesh(cyl,mat(c));m.position.copy(a).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(UP,d.clone().normalize());m.userData={r,len:d.length(),order,stick:1};m.scale.set(.0001,.0001,.0001);pivot.add(m);parts.push(m);return m;}
+  function layout(len,mode){
+    const Pp=[],Dd=[];
+    for(let i=0;i<len;i++){
+      if(mode==="ring"){const R=Math.max(2.6,len*.66),a=i/len*Math.PI*2;Pp.push(new THREE.Vector3(R*Math.cos(a),R*Math.sin(a),.6*Math.sin(3*a)));Dd.push(new THREE.Vector3(Math.cos(a),Math.sin(a),i%2?.55:-.55).normalize());}
+      else if(mode==="helix"){const a=i*100*Math.PI/180;Pp.push(new THREE.Vector3(2.3*Math.cos(a),i*1.5-(len-1)*.75,2.3*Math.sin(a)));Dd.push(new THREE.Vector3(Math.cos(a),0,Math.sin(a)));}
+      else{Pp.push(new THREE.Vector3((i-(len-1)/2)*3.1,i%2?.9:-.9,Math.sin(i*1.3)*.5));Dd.push(new THREE.Vector3(0,i%2?1:-1,i%2?.45:-.45).normalize());}
+    }
+    return [Pp,Dd];
+  }
+  function build(p){
+    pep=p; parts.forEach(m=>{pivot.remove(m);m.material.dispose();}); parts=[];atoms=[];
+    const segs=p.q.split("|"); const seq=segs.join("");n=seq.length;
+    const CA=[],SC=[]; let idx=0;
+    segs.forEach((s,k)=>{
+      const mode=(p.cyc&&s.length<=16)?"ring":(s.length>=12?"helix":"zig");
+      const [Pp,Dd]=layout(s.length,mode);
+      const off=new THREE.Vector3((k-(segs.length-1)/2)*9,0,0);
+      for(let i=0;i<s.length;i++){
+        const ch=s[i],sz=SIZE[ch]??.6,ca=Pp[i].add(off),g=idx;
+        CA[g]=ca; ball(ca,.55,"#e9e5d6",g,g);
+        if(sz>0){const sc=ca.clone().addScaledVector(Dd[i],1.2+sz*1.1);SC[g]=sc;stick(ca,sc,.13,"#bdb8a6",g);ball(sc,.32+sz*.42,RC[AA[ch][1]],g,g);}else SC[g]=ca;
+        if(i>0)stick(CA[g-1],ca,.2,"#e9e5d6",g);
+        idx++;
+      }
+      if(mode==="ring"&&!/C.*C/.test(s))stick(CA[idx-1],CA[idx-s.length],.2,"#e9e5d6",idx-1);
+    });
+    let ss=p.ss;
+    if(!ss){ss=[];const cs=[...seq].map((c,i)=>c==="C"?i:-1).filter(i=>i>=0);for(let i=0;i+1<cs.length;i+=2)ss.push([cs[i],cs[i+1]]);}
+    ss.forEach(([a,b])=>stick(SC[a],SC[b],.16,"#d8e86a",Math.max(a,b)));
+    let R=1;parts.forEach(m=>{R=Math.max(R,m.position.length()+1);});
+    rad=R; zf=1;
+    t0=performance.now(); hover=-1; start();
+  }
+  function size(){const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+  new ResizeObserver(size).observe(canvas);
+  function eob(x){const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
+  function frame(now){
+    if(!running)return;
+    const per=motion?Math.min(60,1600/n):0, k=motion?(now-t0)/per:1e9;
+    parts.forEach(m=>{
+      const s=Math.max(0,Math.min(1,(k-m.userData.order)/6)); const e=s<1?eob(s):1;
+      if(m.userData.stick)m.scale.set(m.userData.r*e,m.userData.len*e,m.userData.r*e);
+      else m.scale.setScalar(m.userData.r*e*(m.userData.res===hover?1.25:1));
+    });
+    if(!drag&&motion)ry+=.0045;
+    pivot.rotation.set(rx,ry,0);
+    const half=Math.min(19*Math.PI/180,Math.atan(Math.tan(19*Math.PI/180)*cam.aspect));
+    cam.position.set(0,0,rad/Math.tan(half)*.92*zf);cam.lookAt(0,0,0);
+    renderer.render(scene,cam);
+    requestAnimationFrame(frame);
+  }
+  function start(){if(running||!visible)return;running=true;size();requestAnimationFrame(frame);}
+  function stop(){running=false;}
+  canvas.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener("pointerup",()=>drag=null);
+  canvas.addEventListener("pointercancel",()=>drag=null);
+  canvas.addEventListener("pointermove",e=>{
+    if(drag){ry+=(e.clientX-drag.x)*.01;rx=Math.max(-1.4,Math.min(1.4,rx+(e.clientY-drag.y)*.01));drag={x:e.clientX,y:e.clientY};return;}
+    if(!opts.onHover)return;
+    const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+    ray.setFromCamera(ndc,cam);const hit=ray.intersectObjects(atoms)[0];
+    setHover(hit?hit.object.userData.res:-1); opts.onHover(hit?hit.object.userData.res:-1,e.clientX,e.clientY);
+  });
+  canvas.addEventListener("pointerleave",()=>{if(opts.onHover){setHover(-1);opts.onHover(-1);}});
+  if(opts.zoom)canvas.addEventListener("wheel",e=>{e.preventDefault();zoom(e.deltaY>0?1.1:.9);},{passive:false});
+  function zoom(f){zf=Math.max(.35,Math.min(2.2,zf*f));}
+  function setHover(i){if(i===hover)return;hover=i;atoms.forEach(m=>m.material.emissive.setHex(m.userData.res===i?0x444444:0));}
+  new IntersectionObserver(es=>{visible=es[0].isIntersecting;visible?start():stop();}).observe(canvas);
+  return {build,start,stop,zoom,setHover,rebuild:()=>pep&&build(pep)};
+}
+
+/* ---------- hero ---------- */
+const byId=Object.fromEntries(P.map(p=>[p.id,p]));
+const hero=makeViewer(document.getElementById("heroCanvas"));
+if(hero)hero.build(byId.sema); else document.getElementById("heroStage").innerHTML='<div class="nogl">No WebGL on this device, so the 3D models are off. Everything else works.</div>';
+const allH=[...new Set(P.flatMap(p=>[...p.up,...p.dn]))];
+document.getElementById("stats").innerHTML=[[P.length,"peptides on the board"],[allH.length,"hormones and signals mapped"],[P.filter(p=>p.st==="fda").length,"FDA approved"],[P.reduce((a,p)=>a+p.len,0),"amino acids drawn"]].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+
+/* ---------- periodic table ---------- */
+const grid=document.getElementById("grid"),fEl=document.getElementById("filters");
+let fam="all";
+fEl.innerHTML=`<button class="chip" data-f="all" aria-pressed="true">All families</button>`+Object.entries(FAM).map(([k,v])=>`<button class="chip" data-f="${k}" aria-pressed="false"><i style="background:${v.c}"></i>${v.n}</button>`).join("");
+const tileHTML=p=>`<button class="tile" data-id="${p.id}" style="--c:${FAM[p.c].c}" aria-label="${p.n}, ${STATUS[p.st]}">
+  <span class="no"><span>${p.i}</span><span>${p.len} aa</span></span>
+  <span class="st s-${p.st}">${{fda:"FDA",inv:"Trial",res:"Research",limbo:"Limbo",intl:"Intl",endo:"Natural",disc:"Disc."}[p.st]}</span>
+  <span class="sym">${p.s}</span><span class="nm">${p.n}</span>
+  <span class="meta">t½ ${p.hl.split(";")[0].replace("about ","~")}</span></button>`;
+grid.innerHTML=P.map(tileHTML).join("");
+const tiles=[...grid.children];
+function applyFilter(){
+  const q=document.getElementById("q").value.trim().toLowerCase(),sort=document.getElementById("sort").value;
+  const evo={A:0,B:1,C:2};
+  const order=[...P].sort((a,b)=>sort==="name"?a.n.localeCompare(b.n):sort==="h"?a.h-b.h:sort==="len"?a.len-b.len:sort==="ev"?evo[a.ev]-evo[b.ev]||a.i-b.i:a.i-b.i);
+  let shown=0;
+  order.forEach(p=>{const t=tiles[p.i-1];grid.appendChild(t);
+    const hay=(p.n+" "+p.r+" "+p.up.join(" ")+" "+p.dn.join(" ")+" "+p.f.join(" ")+" "+FAM[p.c].n).toLowerCase();
+    const ok=(fam==="all"||p.c===fam)&&(!q||hay.includes(q));t.classList.toggle("hide",!ok);if(ok)shown++;});
+  document.getElementById("empty").hidden=shown>0;
+}
+fEl.addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;fam=b.dataset.f;fEl.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b));applyFilter();});
+document.getElementById("q").addEventListener("input",applyFilter);
+document.getElementById("sort").addEventListener("change",applyFilter);
+grid.addEventListener("click",e=>{const t=e.target.closest(".tile");if(t)openPep(t.dataset.id);});
+if(matchMedia("(pointer:fine)").matches)grid.addEventListener("pointermove",e=>{const t=e.target.closest(".tile");if(!t||!motion)return;const r=t.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;t.style.transform=`perspective(500px) rotateY(${x*10}deg) rotateX(${-y*10}deg) translateY(-2px)`;});
+grid.addEventListener("pointerout",e=>{const t=e.target.closest(".tile");if(t&&!t.contains(e.relatedTarget))t.style.transform="";});
+
+/* ---------- switchboard ---------- */
+const hEl=document.getElementById("hormones");
+hEl.innerHTML=allH.map(h=>{const c=P.filter(p=>p.up.includes(h)||p.dn.includes(h)).length;return `<button class="chip" data-h="${h}" aria-pressed="false">${h} <b>${c}</b></button>`;}).join("");
+const pchip=p=>`<button class="pchip" data-id="${p.id}">${p.n}${p.flare?' <small>after a 1 to 2 week flare</small>':''}</button>`;
+function pickH(h){
+  hEl.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.h===h));
+  document.getElementById("hname").textContent=h;document.getElementById("hdesc").textContent=HORM[h]||"";
+  const up=P.filter(p=>p.up.includes(h)),dn=P.filter(p=>p.dn.includes(h));
+  document.getElementById("hup").innerHTML=up.map(pchip).join("")||'<span class="muted hand">Nothing on this board.</span>';
+  document.getElementById("hdown").innerHTML=dn.map(pchip).join("")||'<span class="muted hand">Nothing on this board.</span>';
+}
+hEl.addEventListener("click",e=>{const b=e.target.closest("[data-h]");if(b)pickH(b.dataset.h);});
+document.getElementById("switchboard").addEventListener("click",e=>{const b=e.target.closest(".pchip");if(b)openPep(b.dataset.id);});
+pickH("GH");
+
+/* ---------- weight-loss chart ---------- */
+(function(){
+  const rows=[["Retatrutide","reta",28.3,"80 wk · phase 3, not yet approved"],["Setmelanotide","setmel",25.6,"~1 yr · rare genetic obesity only"],["CagriSema","cagri",22.7,"68 wk · FDA decision pending"],["Tirzepatide","tirz",20.9,"72 wk · approved"],["Semaglutide 2.4 mg","sema",14.9,"68 wk · approved"],["Orforglipron (pill, not a peptide)",null,12.4,"72 wk · approved Apr 2026"],["Cagrilintide alone","cagri",11.8,"68 wk · investigational"],["Liraglutide 3 mg","lira",8.0,"56 wk · approved"]];
+  const W=900,L=250,R=150,rowH=44,top=30,H=top+rows.length*rowH+30,x=v=>L+v/30*(W-L-R);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mean percent weight loss by drug">`;
+  [0,10,20,30].forEach(v=>{s+=`<line class="grid-l" x1="${x(v)}" x2="${x(v)}" y1="${top-8}" y2="${H-24}"/><text class="tick" x="${x(v)}" y="${H-6}" text-anchor="middle">-${v}%</text>`;});
+  rows.forEach(([n,id,v,meta],i)=>{const y=top+i*rowH,p=id&&byId[id],c=p?FAM[p.c].c:"#b7c4b9";
+    s+=`<g class="bar-g" ${id?`data-id="${id}" tabindex="0" role="button"`:""}><text x="${L-12}" y="${y+16}" text-anchor="end" font-size="14" font-weight="700">${n}</text><text x="${L-12}" y="${y+32}" text-anchor="end" class="tick">${meta}</text>
+    <rect class="b" x="${L}" y="${y+4}" width="${x(v)-L}" height="24" rx="4" fill="${c}" ${id?"":'fill-opacity=".35" stroke="#b7c4b9" stroke-dasharray="4 4"'} data-w="${x(v)-L}"/>
+    <text x="${x(v)+8}" y="${y+21}" font-family="JetBrains Mono, monospace" font-size="14" font-weight="600">-${v.toFixed(1)}%</text></g>`;});
+  s+="</svg>";const box=document.getElementById("wlChart");box.innerHTML=s;
+  box.addEventListener("click",e=>{const g=e.target.closest("[data-id]");if(g)openPep(g.dataset.id);});
+  box.addEventListener("keydown",e=>{if(e.key==="Enter"){const g=e.target.closest("[data-id]");if(g)openPep(g.dataset.id);}});
+})();
+
+/* ---------- half-life chart ---------- */
+(function(){
+  const fams=Object.keys(FAM),W=960,L=200,R=30,top=20,rowH=40,H=top+fams.length*rowH+40;
+  const lmin=Math.log10(.02),lmax=Math.log10(2000),x=h=>L+(Math.log10(h)-lmin)/(lmax-lmin)*(W-L-R);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Half-life of each peptide on a log scale">`;
+  [[1/60,"1 min"],[1,"1 hour"],[24,"1 day"],[168,"1 week"],[720,"1 month"]].forEach(([h,l])=>{s+=`<line class="grid-l" x1="${x(h)}" x2="${x(h)}" y1="${top}" y2="${H-30}"/><text class="tick" x="${x(h)}" y="${H-10}" text-anchor="middle">${l}</text>`;});
+  fams.forEach((f,r)=>{const y=top+r*rowH+rowH/2;s+=`<text x="${L-14}" y="${y+5}" text-anchor="end" font-size="13" fill="${FAM[f].c}">${FAM[f].n}</text><line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="rgba(241,239,230,.08)"/>`;
+    const placed=[];
+    P.filter(p=>p.c===f).sort((a,b)=>a.h-b.h).forEach(p=>{const cx=x(p.h);
+      const cy=y+([0,-1,1,-2,2].map(o=>o*11).find(dy=>placed.every(([px,py])=>Math.hypot(px-cx,py-(y+dy))>=22))??0);placed.push([cx,cy]);
+      s+=`<g class="dot" data-id="${p.id}" tabindex="0" role="button"><title>${p.n}: ${p.hl}</title><circle cx="${cx}" cy="${cy}" r="12" fill="${FAM[f].c}"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="10" font-weight="700" fill="#17251f">${p.s}</text></g>`;});
+  });
+  s+="</svg>";const box=document.getElementById("hlChart");box.innerHTML=s;
+  box.addEventListener("click",e=>{const g=e.target.closest("[data-id]");if(g)openPep(g.dataset.id);});
+  box.addEventListener("keydown",e=>{if(e.key==="Enter"){const g=e.target.closest("[data-id]");if(g)openPep(g.dataset.id);}});
+})();
+
+/* ---------- modal ---------- */
+const modal=document.getElementById("modal"),mData=document.getElementById("mData"),tip=document.getElementById("tip");
+let mv=null,cur=null,lastFocus=null;
+document.getElementById("legend").innerHTML=Object.entries(RC).map(([k,c])=>`<span><i style="background:${c}"></i>${k}</span>`).join("")+'<span><i style="background:#d8e86a;border-radius:2px;height:3px"></i>disulfide</span>';
+function ensureViewer(){
+  if(mv!==null)return mv;
+  mv=makeViewer(document.getElementById("mCanvas"),{zoom:1,onHover:(i,x,y)=>{
+    if(i<0||!cur){tip.hidden=true;highlightChip(-1);return;}
+    const ch=cur.q.replace("|","")[i];tip.hidden=false;tip.textContent=`${AA[ch][0]} ${i+1} · ${AA[ch][1]}`;tip.style.left=(x+14)+"px";tip.style.top=(y+12)+"px";highlightChip(i);}});
+  if(!mv){mv=false;document.getElementById("nogl").hidden=false;}
+  return mv;
+}
+function highlightChip(i){mData.querySelectorAll(".aa").forEach(a=>a.style.outline=+a.dataset.i===i?"2px solid #f1efe6":"");}
+const fxBar=(v,i)=>{const w=Math.abs(v)/3*50,c=v<0?"var(--blue)":"var(--orange)";return `<span>${FX[i]}</span><span class="track"><span class="fill" style="left:${v<0?50-w:50}%;width:${w}%;background:${c}"></span></span><span class="v">${v>0?"+":""}${v}</span>`;};
+function openPep(id){
+  const p=byId[id];if(!p)return;cur=p;
+  if(modal.hidden){lastFocus=document.activeElement;modal.hidden=false;lenis&&lenis.stop();document.body.style.overflow="hidden";}
+  const fc=FAM[p.c].c,seq=p.q;let gi=0;
+  const chips=[...seq].map(ch=>ch==="|"?'<span class="aa brk"></span>':`<span class="aa" data-i="${gi++}" style="background:${RC[AA[ch][1]]}" title="${AA[ch][0]} ${gi}">${ch}</span>`).join("");
+  const hchips=(arr,cls)=>arr.length?arr.map(h=>`<span class="pill" style="color:var(--${cls})">${h}</span>`).join(" "):'<span class="muted">none on record</span>';
+  document.getElementById("mStageTitle").textContent=`${p.n} · ${p.len} residues${p.cyc?" · cyclic":""}`;
+  mData.innerHTML=`
+  <div class="dhead"><div class="el" style="--c:${fc}"><small>${p.i}</small>${p.s}</div>
+    <div style="min-width:0"><h2 id="mName" class="chalk">${p.n}</h2>
+    <div class="pills"><span class="pill s-${p.st}">${STATUS[p.st]}</span><span class="pill" style="color:${fc}">${FAM[p.c].n}</span><span class="pill" style="color:var(--chalk-dim)">Evidence ${p.ev}</span></div></div></div>
+  <div class="mini-prof"><div class="prof" id="profM">${PROF_SVG}</div><div class="bubble" id="bubbleM"><span class="who">Prof. Helix</span><span class="txt"></span></div></div>
+  <div class="blk"><h3>Sequence</h3><div class="seq" id="seqRow">${chips}</div>${p.mods?`<p class="muted" style="margin-top:8px;font-size:.88rem">${p.mods}</p>`:""}</div>
+  <div class="blk"><h3>Hormone switches</h3><dl class="kv"><dt>Lock</dt><dd>${p.r}</dd><dt style="color:var(--up)">▲ Up</dt><dd>${hchips(p.up,"up")}</dd><dt style="color:var(--down)">▼ Down</dt><dd>${hchips(p.dn,"down")}${p.flare?' <span class="muted" style="font-size:.85rem">(after a 1 to 2 week flare)</span>':""}</dd></dl></div>
+  <div class="blk"><h3>What it does</h3><ul>${p.f.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+  <div class="blk"><h3>Metabolic fingerprint</h3><div class="fx">${p.m.map(fxBar).join("")}</div><p class="muted" style="font-size:.78rem;margin-top:6px">Blue lowers, orange raises. Professor's evidence-weighted estimate.</p></div>
+  <div class="blk"><h3>Pharmacokinetics</h3><dl class="kv"><dt>Half-life</dt><dd>${p.hl}</dd><dt>Route</dt><dd>${p.rt}</dd><dt>Length</dt><dd>${p.len} amino acids</dd></dl></div>
+  ${p.tr?`<div class="blk"><h3>Clinical scoreboard</h3><p>${p.tr}</p></div>`:""}
+  ${p.se.length?`<div class="blk"><h3>Side effects and cautions</h3><ul>${p.se.map(x=>`<li>${x}</li>`).join("")}</ul></div>`:""}
+  <div class="navrow"><button class="btn ghost" id="prevP">← ${P[(p.i-2+P.length)%P.length].n}</button><button class="btn ghost" id="nextP">${P[p.i%P.length].n} →</button></div>`;
+  mData.scrollTop=0;
+  say(document.getElementById("bubbleM"),document.getElementById("profM"),p.say);
+  document.getElementById("bubbleM").addEventListener("click",function(){this._done&&this._done();});
+  document.getElementById("prevP").onclick=()=>openPep(P[(p.i-2+P.length)%P.length].id);
+  document.getElementById("nextP").onclick=()=>openPep(P[p.i%P.length].id);
+  const sr=document.getElementById("seqRow");
+  sr.addEventListener("pointerover",e=>{const a=e.target.closest(".aa");if(a&&mv)mv.setHover(+a.dataset.i);});
+  sr.addEventListener("pointerout",()=>mv&&mv.setHover(-1));
+  const v=ensureViewer();if(v)v.build(p);
+  document.getElementById("mClose").focus({preventScroll:true});
+}
+function closePep(){if(modal.hidden)return;modal.hidden=true;tip.hidden=true;mv&&mv.stop();lenis&&lenis.start();document.body.style.overflow="";cur=null;lastFocus&&lastFocus.focus({preventScroll:true});}
+document.getElementById("mClose").onclick=closePep;
+modal.addEventListener("click",e=>{if(e.target===modal)closePep();});
+document.getElementById("zIn").onclick=()=>mv&&mv.zoom(.85);
+document.getElementById("zOut").onclick=()=>mv&&mv.zoom(1.18);
+document.getElementById("rebuild").onclick=()=>mv&&mv.rebuild();
+addEventListener("keydown",e=>{if(modal.hidden||!cur)return;if(e.key==="Escape")closePep();if(e.key==="ArrowRight")openPep(P[cur.i%P.length].id);if(e.key==="ArrowLeft")openPep(P[(cur.i-2+P.length)%P.length].id);});
+
+/* ---------- quiz ---------- */
+const qcard=document.getElementById("qcard"),prof2=document.getElementById("prof2");
+let quiz=[],qi=0,score=0;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function newQuiz(){
+  const pool=shuffle(P.filter(p=>p.dn.length||p.up.length)).slice(0,5);
+  quiz=pool.map(p=>{const down=p.dn.length&&(Math.random()<.65||!p.up.length);const ans=down?p.dn[0]:p.up[0];const wrong=shuffle(allH.filter(h=>!p.dn.includes(h)&&!p.up.includes(h))).slice(0,3);return {p,q:`${p.n} turns which of these <b>${down?"down":"up"}</b>?`,ans,opts:shuffle([ans,...wrong])};});
+  qi=0;score=0;renderQ();
+}
+function renderQ(){
+  const prog=quiz.map((_,i)=>`<i class="${i<qi?"done":""}"></i>`).join("");
+  if(qi>=quiz.length){
+    const msg=score===5?"Perfect score. I'm putting your name on the board.":score>=3?"Solid work. Review the switchboard and you'll ace the final.":"We all start somewhere. Spin a few molecules and try again.";
+    qcard.innerHTML=`<div class="qprog">${prog}</div><p class="qq">You scored <b style="color:var(--yellow)">${score} / 5</b></p><p class="hand" style="font-size:1.15rem">${msg}</p><button class="btn" id="again">New quiz</button>`;
+    document.getElementById("again").onclick=newQuiz;prof2.classList.toggle("talking",motion);setTimeout(()=>prof2.classList.remove("talking"),1200);return;}
+  const it=quiz[qi];
+  qcard.innerHTML=`<div class="qprog">${prog}</div><p class="eyebrow">Question ${qi+1} of 5</p><p class="qq">${it.q}</p><div class="opts">${it.opts.map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join("")}</div><p class="hand muted" id="qfb" style="min-height:1.6em;margin:12px 0 0"></p>`;
+  qcard.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===it.ans;if(ok)score++;
+    qcard.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.dataset.o===it.ans)x.classList.add("right");});
+    if(!ok)b.classList.add("wrong");
+    document.getElementById("qfb").innerHTML=(ok?"Correct. ":"Not quite. ")+`<a href="#" data-id="${it.p.id}">Open ${it.p.n} on the bench</a>`;
+    setTimeout(()=>{qi++;renderQ();},1700);
+  });
+}
+qcard.addEventListener("click",e=>{const a=e.target.closest("a[data-id]");if(a){e.preventDefault();openPep(a.dataset.id);}});
+newQuiz();
+
+/* ---------- scroll engine + reveals ---------- */
+let lenis=null;
+const prog=document.getElementById("progress");
+function onScroll(){const m=document.documentElement.scrollHeight-innerHeight;prog.style.transform=`scaleX(${m>0?scrollY/m:0})`;
+  const secs=["lecture","table","switchboard","scoreboard","halflife","quiz"];let on=secs[0];secs.forEach(s=>{const el=document.getElementById(s);if(el.getBoundingClientRect().top<innerHeight*.4)on=s;});
+  document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+on));}
+addEventListener("scroll",onScroll,{passive:true});onScroll();
+function startMotion(){
+  if(!motion||!window.gsap)return;
+  gsap.registerPlugin(ScrollTrigger);
+  if(window.Lenis&&!lenis){lenis=new Lenis({lerp:.1});lenis.on("scroll",ScrollTrigger.update);gsap.ticker.add(t=>lenis&&lenis.raf(t*1000));gsap.ticker.lagSmoothing(0);}
+  gsap.utils.toArray(".reveal").forEach(el=>gsap.from(el,{y:28,opacity:.35,duration:.8,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 90%",once:true}}));
+  gsap.from(".tile",{y:24,opacity:.3,duration:.6,ease:"power3.out",stagger:.015,scrollTrigger:{trigger:"#grid",start:"top 85%",once:true}});
+  document.querySelectorAll("#wlChart rect.b").forEach((r,i)=>gsap.from(r,{attr:{width:0},duration:1.1,ease:"power3.out",delay:i*.08,scrollTrigger:{trigger:"#wlChart",start:"top 80%",once:true}}));
+  gsap.from("#title",{clipPath:"inset(0 100% 0 0)",duration:1.2,ease:"power2.inOut"});
+}
+startMotion();
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener("click",e=>{const id=a.getAttribute("href").slice(1),el=document.getElementById(id);if(!el)return;e.preventDefault();lenis?lenis.scrollTo(el,{offset:-60}):el.scrollIntoView({behavior:motion?"smooth":"auto"});}));
+mt.onclick=()=>{motion=!motion;try{localStorage.setItem("pl-motion",motion?"1":"0");}catch(e){}syncMotion();
+  if(!motion&&lenis){lenis.destroy();lenis=null;} if(motion)startMotion();};
+
+say(document.getElementById("bubble1"),document.getElementById("prof1"),INTRO);
+const h0=location.hash.slice(1);if(h0.startsWith("pep-")&&byId[h0.slice(4)])openPep(h0.slice(4));
+</script>
